@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="import" href="../../components/polymer/polymer.html"/>
+    <script src="../../components/webcomponentsjs/webcomponents-lite.js"></script>
+    <script type='text/javascript' src="../../components/ti-core-assets/scripts/q.js"></script>
+    <link rel="import" href="../../components/vaadin-grid/vaadin-grid.html"/>
+    <link rel="import" href="../../components/vaadin-grid/vaadin-grid-sorter.html"/>
+    <link rel="import" href="../../components/paper-styles/color.html"/>
+    <link rel="import" href="../../components/iron-icons/iron-icons.html"/>
+    <link rel="import" href="../../components/ti-core-stylesheets/ti-core-stylesheets.html">
+    <link rel="import" href="../../components/ti-widget-common/ti-widget-checkbox.html"/>
+    <link rel="import" href="../../components/ti-widget-common-behaviors/ti-widget-common-behaviors.html"/>
+    </head>
+<body unresolved class="ti-theme">
+<dom-module id="ti-trace-cptracer2-latency-table">
+    <template>
+      <style is="custom-style">
+        #table {
+          display: flex;
+          height: 100%;
+          font-family: courier, monospace;
+          font-size: 12px;
+          white-space: normal;
+          --vaadin-grid-header-cell: {
+            height: 20px;
+          }
+          --vaadin-grid-body-cell: {
+            height: 20px;
+            font-size: 12px;
+            white-space: nowrap;
+          }
+          --vaadin-grid-body-row-active-cell: {
+            background-color: #f2fbfd;
+          }
+          --vaadin-grid-body-row-details-cell: {
+            background-color: #f2fdf2;
+          }
+        }
+        
+        ti-widget-checkbox {
+          --paper-checkbox-size: 10px;
+          --paper-checkbox-ink-size: 20px;
+          --paper-checkbox-label-spacing: 4px;
+        }
+        
+      </style>
+        <vaadin-grid id="table" items="[[data]]" active-item="{{activeItem}}" column-reordering-allowed>
+          <vaadin-grid-column width="5em" flex-grow="0" resizable draggable>
+            <template class="header"><vaadin-grid-sorter path="seq">#<vaadin-grid-sorter></template>
+            <template>[[item.seq]]</template>
+          </vaadin-grid-column>
+          <vaadin-grid-column width="10em" flex-grow="0" resizable draggable>
+            <template class="header">Probe Name</template>
+            <template>[[item.mastname]]</template>
+          </vaadin-grid-column>
+          <vaadin-grid-column resizable draggable>
+            <template class="header">Data Message</template>
+            <template>[[item.datamsg]]</template>
+          </vaadin-grid-column>
+          <vaadin-grid-column resizable draggable>
+            <template class="header">Tracked</template>
+            <template>[[item.tracked]]</template>
+          </vaadin-grid-column>
+          <vaadin-grid-column resizable draggable>
+            <template class="header">Matched</template>
+            <template>[[item.matched]]</template>
+          </vaadin-grid-column>
+          <vaadin-grid-column resizable draggable>
+            <template class="header">Max Wait</template>
+            <template>[[item.maxwait]]</template>
+          </vaadin-grid-column>
+          <vaadin-grid-column resizable draggable>
+            <template class="header">Total Wait</template>
+            <template>[[item.totalwait]]</template>
+          </vaadin-grid-column>
+          <vaadin-grid-column resizable draggable>
+            <template class="header">Credit Wait</template>
+            <template>[[item.creditwait]]</template>
+          </vaadin-grid-column>
+          <vaadin-grid-column resizable draggable>
+            <template class="header">Delta Time</template>
+            <template>[[item.deltatime]]</template>
+          </vaadin-grid-column>
+          <vaadin-grid-column resizable draggable>
+            <template class="header">Time (ticks)</template>
+            <template>[[item.time]]</template>
+          </vaadin-grid-column>
+          <vaadin-grid-column resizable draggable>
+            <template class="header">Trace Status</template>
+            <template>[[item.tracestatus]]</template>
+          </vaadin-grid-column>
+        </vaadin-grid>
+    </template>
+    <script>
+    Polymer({
+      is: 'ti-trace-cptracer2-latency-table',
+      behaviors: [TiWidgetBase],
+      properties: {
+        activeItem: {
+          notify: true,
+          reflectToAttribute: true,
+          value: undefined
+        },
+        data: {
+            type: Array,
+            notify: true,
+            value: function() {return [];}
+        }
+      },
+      ready: function() {
+
+      },
+    });
+    </script>
+</dom-module>
+</body>
+</html>

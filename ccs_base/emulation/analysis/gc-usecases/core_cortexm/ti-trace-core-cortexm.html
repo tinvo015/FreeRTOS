@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<link rel="import" href="../components/polymer/polymer.html">
+<script src="../components/webcomponentsjs/webcomponents-lite.min.js"></script>
+<script type='text/javascript' src="../components/ti-core-assets/scripts/q.js"></script>
+<link rel="import" href="../components/ti-widget-common/ti-widget-tabcontainer.html">
+<link rel="import" href="../components/ti-widget-common/ti-widget-tab.html">
+<link rel="import" href="../components/ti-widget-common/ti-widget-dialog.html">
+<link rel="import" href="../components/ti-widget-icon-button/ti-widget-icon-button.html">
+<link rel="import" href="../components/ti-widget-common/ti-widget-label.html">
+<link rel="import" href="../components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../components/paper-button/paper-button.html">
+<link rel="import" href="../components/iron-icons/iron-icons.html">
+<link rel="import" href="../components/iron-icons/av-icons.html">
+<link rel="import" href="../components/iron-icons/hardware-icons.html">
+<link rel="import" href="../components-dbgtrc/ti-trace-common/ti-trace-menubar.html">
+<link rel="import" href="../components-dbgtrc/ti-trace-swmsg/ti-trace-swmsg-view.html">
+<link rel="import" href="ti-trace-swo-receiver.html">
+<link rel="import" href="ti-trace-itm-table.html">
+<link rel="import" href="ti-trace-itm-stat-func-table.html">
+<link rel="import" href="ti-trace-itm-data-var-graph.html">
+<link rel="import" href="ti-trace-itm-var-trace-config.html">
+<link rel="import" href="ti-trace-itm-exception-graph.html">
+<link rel="import" href="ti-trace-itm-settings.html">
+<link rel="import" href="../components-dbgtrc/ti-trace-common/ti-trace-common-style.html">
+
+</head>
+
+<body class="ti-theme" unresolved>
+    <dom-module id="ti-trace-core-cortexm">
+    <template>
+        <style include="ti-trace-common-style"> </style>
+        <style>
+            html {
+                margin: 0px;
+                padding: 0px;
+            }
+            body {
+                padding: 0;
+                margin: 0;
+                border: 0;
+            }
+            #itmContainer {
+                position:absolute;
+                width: 100%;
+                height: 100%;
+            }
+
+            .itmview {
+                width: 100%;
+                height: 100%;
+            }
+
+            button {
+              display: block;
+              line-height: 40px;
+              background-color: transparent;
+              border: none;
+              font-size: 14px;
+              margin: 20px;
+            }
+        </style>
+        <custom-style>
+            <style is="custom-style">
+                paper-tabs[no-bar] paper-tab.iron-selected {
+                    color: #ff0000;
+                }
+            </style>
+        </custom-style>
+
+        <ti-trace-model id="tm" device-id="{{devID}}" trace-agent="{{ta}}" device-info="{{deviceInfo}}" active-core="{{activeCore}}" active-out-file-name="{{activeOutFileName}}"></ti-trace-model>
+        <ti-trace-progress id="progress" status="[[traceStatus]]"></ti-trace-progress>
+        <ti-trace-itm-settings id="itmSettings" ta="[[ta]]" trace-op="{{traceOp}}" aet-op="{{aetOp}}" active-core="[[activeCore]]" device-info="{{deviceInfo}}" active-out-file-name="[[activeOutFileName]]" channel-color="{{swmsgChanColor}}" trace-routes="[[traceRoutes]]" connect-to-core="[[connectToCore]]"></ti-trace-itm-settings>
+
+        <div style="position:absolute;height:100%;width:100%;">
+            <div style="position:relative;height:40px;width:100%;">
+                <ti-trace-menubar id="itmMenubar" open-settings=[[toggleSettings]] status-msg=[[traceStatus]] num-records=[[numRecordsRead]] num-gaps=[[numGaps]] start-callback="{{startCallback}}" stop-callback="{{stopCallback}}"></ti-trace-menubar>
+            </div>
+
+            <div style="position:relative;height:96%;width:100%;">
+                <ti-widget-tabcontainer id="itmContainer" selected-index="0" selected-label="Setup" layout on-selected_tab_changed="tabClickCallback">
+                    <ti-widget-tab id="swMsgView"  class="itmview" name="[[swMsgUsecaseTabName]]" icon="hardware:computer" tooltip="click to view the software messages">
+                        <div style="position:relative;height:100%;width:100%;">
+                            <ti-trace-swmsg-view msg="[[swMsgTraceData]]" channel-color="{{swmsgChanColor}}"></ti-trace-swmsg-view>
+                        </div>
+                    </ti-widget-tab>
+                    <ti-widget-tab id="statFuncTable" class="itmview" name="[[statFuncUsecaseTabName]]" icon="view-carousel" tooltip="click to view the statistical function profile">
+                        <div style="position:relative;height:100%;width:100%;">
+                            <ti-trace-itm-stat-func-table data={{statFuncData}}></ti-trace-itm-stat-func-table>
+                        </div>
+                    </ti-widget-tab>
+                    <ti-widget-tab id="varTraceView" class="itmview" name="[[varTraceUsecaseTabName]]" icon="timeline" tooltip="click to view the data variable profile">
+                        <div style="position:relative;height:100%;width:100%;">
+                            <div style="position:relative;height:45%;width:100%;">
+                                <p style="font-weight: bold; text-align: center;font-size: 14px;">
+                                    Graphical view of reads and writes
+                                </p>
+                                <ti-trace-itm-data-var-graph id="varGraphID" data={{varTraceData}} labels={{varTraceHeader}} block-draw=[[varTraceBlockDraw]]></ti-trace-itm-data-var-graph>
+                            </div>
+                            <div style="position:relative">
+                                <hr style="position:relative" height="10" noshade/>
+                            </div>
+                            <div style="position:relative;height:50%">
+                                <p style="font-weight: bold; text-align: center;font-size: 14px;">
+                                    Tabular view of reads and writes
+                                </p>
+                                <ti-trace-itm-table data={{varTraceData}} table-columns={{varTraceHeader}}></ti-trace-itm-table>
+                            </div>
+                        </div>
+                    </ti-widget-tab>
+                    <!--ti-widget-tab id="excTraceView" class="itmview" name="[[excUsecaseTabName]]" icon="timeline" tooltip="click to view the exception profile">
+                        <div style="position:relative;height:100%;width:100%;">
+                            <div style="position:relative;height:45%;width:100%;">
+                                <p style="font-weight: bold; text-align: center;font-size: 14px;">
+                                    Graphical view of exception active and preemptive state
+                                </p>
+                                <ti-trace-itm-exception-graph id="excGraphID" data={{excTraceData}} labels={{excTraceHeader}} block-draw=[[excTraceBlockDraw]]></ti-trace-itm-exception-graph>
+                            </div>
+                        </div>
+                    </ti-widget-tab-->
+                    <ti-widget-tab id="itmTable" class="itmview" name="[[traceDataTabName]]" icon="view-column" tooltip="click to view trace data">
+                        <div style="height:100%">
+                            <ti-trace-itm-table data={{traceData}} table-columns={{rawTraceTableColumns}}></ti-trace-itm-table>
+                        </div>
+                    </ti-widget-tab>
+                </ti-widget-tabcontainer>
+            </div>
+        </div>
+    </template>
+    <script>
+        Polymer ({
+            is : "ti-trace-core-cortexm" ,
+            properties: {
+                activeCore: {
+                    notify: true,
+                    type: String,
+                    reflectToAttribute: true,
+                    value: undefined,
+                    observer: "_activeCoreChanged",
+                },
+                activeOutFileName: {
+                    notify: true,
+                    type: String,
+                    reflectToAttribute: true,
+                    value: undefined,
+                },
+                deviceInfo : {
+                    notify: true,
+                    type: String,
+                    reflectToAttribute: true,
+                    value: undefined,
+                    observer: "_deviceInfoChanged",
+                },
+                traceOp : {
+                    notify: true,
+                    type: Number,
+                    reflectToAttribute: true,
+                    value: undefined
+                },
+                aetOp : {
+                    notify: true,
+                    type: Number,
+                    reflectToAttribute: true,
+                    value: undefined
+                },
+                ta : {
+                    notify: true,
+                    type: Object,
+                    reflectToAttribute: true
+                },
+                devId : {
+                    notify: true,
+                    type: Number,
+                    reflectToAttribute: true
+                },
+                swoProperties : {
+                    notify: true,
+                    reflectToAttribute: true,
+                    type: Array
+                },
+                syncCpu: {
+                    notify: true,
+                    reflectToAttribute: true,
+                    type: Boolean,
+                    value: undefined
+                },
+                traceEnabled: {
+                    notify: true,
+                    reflectToAttribute: true,
+                    type: Boolean,
+                    value: undefined,
+                    observer: "_enabledChanged"
+                },
+                traceStatus : {
+                    notify: true,
+                    reflectToAttribute: true,
+                    type: String,
+                    value: "Configure Event Profile"
+                },
+                numRecordsRead : {
+                    notify: true,
+                    reflectToAttribute: true,
+                    type: String,
+                    value: "0"
+                },
+                numGaps : {
+                    notify: true,
+                    reflectToAttribute: true,
+                    type: String,
+                    value: "0"
+                },
+                traceRoutes : {
+                    notify: true,
+                    reflectToAttribute: true,
+                    type: Array,
+                    value: []
+                },
+                traceData : {
+                    notify: true,
+                    reflectToAttribute: true,
+                    type: Array,
+                    value: undefined
+                },
+                statFuncData : {
+                    notify: true,
+                    reflectToAttribute: true,
+                    type: Array,
+                    value: undefined
+                },
+                varTraceData : {
+                    notify: true,
+                    reflectToAttribute: true,
+                    type: Array,
+                    value: undefined
+                },
+                varTraceHeader : {
+                    notify: true,
+                    reflectToAttribute: true,
+                    type: Array,
+                },
+                excTraceData : {
+                    notify: true,
+                    reflectToAttribute: true,
+                    type: Array,
+                    value: undefined
+                },
+                excTraceHeader : {
+                    notify: true,
+                    reflectToAttribute: true,
+                    type: Array,
+                    value: undefined
+                },
+                statFuncUsecaseTabName: {
+                        notify: true,
+                        reflectToAttribute: true,
+                        type: String,
+                        value: "Statistical Function Profile",
+                },
+                statFuncUsecaseProp : {
+                    notify: true,
+                    reflectToAttribute: true,
+                    type: Array,
+                },
+                statFuncUsecaseEnable: {
+                    notify: true,
+                    reflectToAttribute: true,
+                    type: Boolean,
+                },
+                varTraceUsecaseTabName: {
+                    notify: true,
+                    reflectToAttribute: true,
+                    type: String,
+                    value: "Variable Profile",
+                },
+                varTraceUsecaseEnable: {
+                    notify: true,
+                    reflectToAttribute: true,
+                    type: Boolean,
+                },
+                varTraceUsecaseProp : {
+                    notify: true,
+                    reflectToAttribute: true,
+                    type: Array,
+                },
+                excUsecaseTabName: {
+                    notify: true,
+                    reflectToAttribute: true,
+                    type: String,
+                    value: "Exception Profile",
+                },
+                excUsecaseProp : {
+                    notify: true,
+                    reflectToAttribute: true,
+                    type: Array,
+                },
+                excUsecaseEnable: {
+                    notify: true,
+                    reflectToAttribute: true,
+                    type: Boolean,
+                },
+                traceDataTabName: {
+                        notify: true,
+                        reflectToAttribute: true,
+                        type: String,
+                        value: "Raw Data",
+                },
+                rawTraceTableColumns: {
+                    type: Array,
+                    value: [
+                        "Master Name",
+                        "Channel Number",
+                        "Data Message",
+                        "Data",
+                        "Domain",
+                        "Class",
+                        "Type",
+                        "Data Size",
+                        "Address",
+                        "Timestamp",
+                        "Trace Status",
+                        "Receiver Status"
+                    ],
+                    notify: true,
+                    reflectToAttribute: true,
+                },
+                swmsgUsecaseEnable: {
+                    notify: true,
+                    reflectToAttribute: true,
+                    type: Boolean,
+                },
+                swmsgUsecaseProp : {
+                    notify: true,
+                    reflectToAttribute: true,
+                    type: Array,
+                },
+                swMsgUsecaseTabName: {
+                    notify: true,
+                    reflectToAttribute: true,
+                    type: String,
+                    value: "Message Console",
+                },
+                swMsgTraceData : {
+                    notify: true,
+                    reflectToAttribute: true,
+                    type: Array,
+                    value: []
+                },
+                swmsgChanColor : {
+                    type: Array,
+                    reflectToAttribute: true,
+                    notify: true,
+                },
+                commonTsPrescaler : {
+                    type: String,
+                    notify: true,
+                    reflectToAttribute: true,
+                },
+                statfuncUsecaseRead : {
+                    type: Boolean,
+                    value: false,
+                },
+                varUsecaseRead : {
+                    type: Boolean,
+                    value: false,
+                },
+                excUsecaseRead : {
+                    type: Boolean,
+                    value: false,
+                },
+                swmsgUsecaseRead : {
+                    type: Boolean,
+                    value: false,
+                },
+                rawTraceRead: {
+                    type: Boolean,
+                    value: false,
+                },
+                captureEnabled: {
+                    type: Boolean,
+                    value: false,
+                },
+                varTraceBlockDraw: {
+                    type: Boolean,
+                    notify: true,
+                    reflectToAttribute: true,
+                },
+                excTraceBlockDraw: {
+                    type: Boolean,
+                    notify: true,
+                    reflectToAttribute: true,
+                },
+                isCoreKnown : {
+                    type: Boolean,
+                    notify: true,
+                    value: false,
+                    observer: "_enableCoreEvtNotification",
+                },
+                traceCpu : {
+                    notify: true,
+                    type: String,
+                    reflectToAttribute: true,
+                    value: undefined,
+                },
+            },
+
+            evtCallback: undefined,
+            _evtCallback: function(info)
+            {
+                console.log("Event received: " + JSON.stringify(info));
+                var _self = this;
+
+                if (info.eventName === "Halt")
+                {
+                    if (this.syncCpu)
+                    {
+                        this.ta.cloudTrace.enableTargetPreRunEvent(_self.traceCpu).then(function(){
+                            if (_self.captureEnabled)
+                            {
+                                _self.captureEnabled = false;
+                                console.log("Stopping Trace ...");
+                                _self.$.itmMenubar.setStartIcon();
+                                _self._stopCapture();
+                            }
+                        });
+
+                    }
+                }
+                else if (info.eventName == "PreRun")
+                {
+                    console.log("Target PreRun");
+                    if (this.syncCpu)
+                    {
+                        this.$.itmMenubar.setStopIcon();
+
+                        this._startCapture().then(function() {
+                            _self.captureEnabled = true;
+                            return _self.ta.cloudTrace.disableTargetPreRunEvent(_self.traceCpu);
+                        }).catch(function() {
+                            console.log("start error");
+                            console.log(err);
+                             _self.captureEnabled = false;
+                             _self.$.itmMenubar.setStartIcon();
+                             return _self.$.itmSettings.removesettings(_self.traceCpu);
+                        }).then(function(){
+                            return;
+                        }).finally(function(){
+                            return _self.ta.cloudTrace.preRunComplete();
+                        });
+                    }
+                }
+                else if (info.eventName == "PreRunTiemout")
+                {
+                    //Nothing to do here
+                }
+                else if (info.eventName == "ChangedPc")
+                {
+                    this.ta.cloudTrace.disableTargetPreRunEvent(_self.traceCpu).then(function() {
+                        return _self.ta.cloudTrace.preRunComplete();
+                    });
+                }
+            },
+            readRawTrace: function() {
+                var promise = Q.resolve();
+
+                if (this.rawTraceRead)
+                {
+                    var _self = this;
+                    this.traceStatus = "Processing Raw Data...";
+                    this.$.progress.open();
+                    promise = this.ta.cloudTrace.readItmTraceData(_self.traceOp).then(function (ret) {
+                        _self.traceStatus = "Raw Data Display Complete";
+                        _self.traceData = ret.table.data;
+                        //console.log("Itm Trace Data");
+                        //console.log(ret)
+                    }).catch(function (err) {
+                        _self.traceStatus = "Error Reading Raw Data";
+                        console.log("Failure: "+JSON.stringify(err));
+                    }).finally(function () {
+                        _self.rawTraceRead = false;
+                        _self.$.progress.close();
+                    });
+                }
+                return promise;
+            },
+            readTraceStatFuncProfiling: function() {
+                var promise = Q.resolve();
+
+                if (this.statfuncUsecaseRead)
+                {
+                    var _self = this;
+                    this.traceStatus = "Generating Function Profile ...";
+                    this.$.progress.open();
+                    promise = this.ta.cloudTrace.readItmTraceDataFuncProfiling(_self.traceOp).then(function (ret) {
+                        _self.traceStatus = "Profile Generated Successfully";
+                        _self.statFuncData = ret.table.data;
+                        //console.log("Statistical Function Profiling Data");
+                        //console.log(ret);
+                    }).catch(function (err) {
+                        _self.traceStatus = "Error Generating Profile";
+                        console.log("Failure: "+JSON.stringify(err));
+                    }).finally(function () {
+                        _self.statfuncUsecaseRead = false;
+                        _self.$.progress.close();
+                    });
+                }
+                return promise;
+            },
+            readTraceDataVariableProfiling: function() {
+                var promise = Q.resolve();
+
+                if (this.varUsecaseRead)
+                {
+                    var _self = this;
+                    var header = ["Timestamp"];
+                    var data = [["0","null"]];
+                    var numRead = 0;
+                    this.traceStatus = "Generating Variable Profile...";
+                    this.$.progress.open();
+                    promise = this.ta.cloudTrace.readItmTraceDataVariableProfiling(_self.traceOp).then(function (ret) {
+                        _self.traceStatus = "Profile Generated Successfully";
+                        //console.log("Variable Trace Data");
+                        //console.log(ret);
+                        numRead = parseInt(ret.numRead);
+                        if (numRead !== 0)
+                        {
+                            // Get the header first so it triggers a lable change for the graph
+                            header = ret.table.header;
+                            // Next get the data to display
+                            data = ret.table.data;
+                        }
+                    }).catch(function (err) {
+                        _self.traceStatus = "Error Generating Profile";
+                        console.log("Failure: "+JSON.stringify(err));
+                    }).finally(function () {
+                        // Block redraw
+                        _self.varTraceBlockDraw = true;
+                        _self.varTraceHeader = header;
+                        // Unblock redraw
+                        _self.varTraceBlockDraw = false;
+                        _self.varTraceData = data;
+                        _self.varUsecaseRead = false;
+                        _self.$.varGraphID.resize();
+                        _self.$.progress.close();
+                    });
+                }
+                return promise;
+            },
+            readTraceExceptionProfiling: function() {
+                var promise = Q.resolve();
+                // TODO : No Exception Trace support
+                return promise;
+
+                if (this.excUsecaseRead)
+                {
+                    var _self = this;
+                    var header = ["Timestamp"];
+                    var data = [["0","null"]];
+                    var numRead = 0;
+
+                    this.traceStatus = "Generating Exception Profile...";
+                    this.$.progress.open();
+                    promise = this.ta.cloudTrace.readItmTraceExceptionProfiling(_self.traceOp).then(function (ret) {
+                        _self.traceStatus = "Profile Generated Successfully";
+                        numRead = parseInt(ret.numRead);
+                        if (numRead !== 0)
+                        {
+                            header = ret.table.header;
+                            data = ret.table.data;
+                        }
+                        //console.log("Exception Data");
+                        //console.log(ret);
+                    }).catch(function (err) {
+                        _self.traceStatus = "Error Generating Profile";
+                        console.log("Failure: "+JSON.stringify(err));
+                    }).finally(function () {
+                        _self.excTraceBlockDraw = true;
+                        _self.excTraceHeader = header;
+                        _self.excTraceBlockDraw = false;
+                        _self.excTraceData = data;
+                        _self.excUsecaseRead = false;
+                        _self.$.excGraphID.resize();
+                        _self.$.progress.close();
+                    });
+                }
+                return promise;
+            },
+            readTraceSwMsgProfiling: function() {
+                var promise = Q.resolve();
+
+                if (this.swmsgUsecaseRead)
+                {
+                    var _self = this;
+                    this.traceStatus = "Processing Messages ...";
+                    this.$.progress.open();
+                    promise = this.ta.cloudTrace.readItmTraceDataSWMessages(_self.traceOp).then(function (ret) {
+                        _self.traceStatus = "Profile Generated Successfully";
+                        _self.swMsgTraceData = ret.table.data;
+                        //console.log("Software Messages Data");
+                        //console.log(ret);
+                    }).catch(function (err) {
+                        _self.traceStatus = "Error Generating Profile";
+                        console.log("Failure: "+JSON.stringify(err));
+                    }).finally(function () {
+                        _self.swmsgUsecaseRead = false;
+                        _self.$.progress.close();
+                    });
+                }
+                return promise;
+            },
+            destroyItm: undefined,
+            _destroyItm: function() {
+                this.$.itmSettings.removesettings(this.traceCpu);
+                this.$.itmMenubar.setStartIcon();
+            },
+            configureItm: undefined,
+            _configureItm: function() {
+                var _self = this;
+
+                try {
+                    _self.$.progress.open();
+                    _self.$.itmMenubar.setStopIcon();
+                    _self.$.itmSettings.applysettings(_self.traceCpu);
+                    // Set flag to stop trace capture
+                    _self.captureEnabled = true;
+                } catch (err) {
+                    console.log(err);
+                    console.log("Operation failed" + JSON.stringify(err));
+                    _self.$.itmMenubar.setStartIcon();
+
+                } finally {
+                    _self.$.progress.close();
+                }
+            },
+            tabClickCallback: undefined,
+            _tabClickCallback: function(evt) {
+                var tabIndex = evt.detail["selectedIndex"];
+                var childTab = this.$.itmContainer.getChildTab(tabIndex);
+                switch(childTab.innerText)
+                {
+                    case this.statFuncUsecaseTabName:
+                        this.readTraceStatFuncProfiling();
+                        break;
+                    case this.varTraceUsecaseTabName:
+                        this.readTraceDataVariableProfiling();
+                        this.$.varGraphID.resize();
+                        break;
+                    case this.excUsecaseTabName:
+                        this.readTraceExceptionProfiling();
+                        this.$.excGraphID.resize();
+                        break;
+                    case this.swMsgUsecaseTabName:
+                        this.readTraceSwMsgProfiling();
+                        break;
+                    case this.traceDataTabName:
+                        this.readRawTrace();
+                        break;
+                    default:
+                    break;
+                }
+            },
+
+            _activeCoreChanged : function (newValue, oldValue) {
+                if ((newValue !== oldValue) && (undefined !== newValue))
+                {
+                    if (undefined !== this.deviceInfo && undefined !== this.deviceInfo.name)
+                    {
+                        this.isCoreKnown = true;
+                    }
+                }
+            },
+
+            _deviceInfoChanged : function (newValue, oldValue) {
+                if ((newValue !== oldValue) && (undefined !== newValue))
+                {
+                    if (undefined !== this.activeCore)
+                    {
+                        this.isCoreKnown = true;
+                    }
+                }
+            },
+
+            _enableCoreEvtNotification : function (newValue) {
+                if (true === newValue)
+                {
+                    this.traceCpu = this.deviceInfo.name + "/" + this.activeCore;
+                    var _self = this;
+
+                    var traceRoutes = this.deviceInfo.trace_routes.filter(
+                        route => (route.source === this.traceCpu) &&
+                                 ((route.receiver !== "Pro Trace") || (this.traceCpu.includes("XDSPRO") && 0))
+                    );
+                    this.splice('traceRoutes',0,0, ...traceRoutes);
+
+                    this.ta.cloudTrace.addListener("targetEvent", this.evtCallback);
+                    this.ta.cloudTrace.isTargetConnected(this.traceCpu).then(function(ret) {
+                        if (!ret.connected)
+                        {
+                            throw "Target CPU is not connected";
+                        }
+                        else {
+                            return _self.ta.cloudTrace.enableTargetEvents(_self.traceCpu);
+                        }
+                    }).then(function () {
+                        return _self.ta.cloudTrace.setPreRunTimeout(10000);
+                    }).then (function() {
+                        return _self.ta.cloudTrace.enableTargetPreRunEvent(_self.traceCpu);
+                    }).then(function(){
+                        return _self.$.itmSettings.onetimesetup();
+                    }).catch(function (err) {
+                        console.log("Target event setup failed: " + err);
+                    }).finally(function () {
+                    });
+                }
+            },
+
+            toggleSettings : undefined,
+
+            _toggleSettings : function(){
+                this.$.itmSettings.open();
+            },
+
+            startCallback : undefined,
+
+            _startCallback : function() {
+                this._startCapture();
+            },
+
+            _startCapture : function() {
+                //this.configureItm();
+                var _self = this;
+                var promise = Q.resolve();
+
+                promise = promise.then(function(){
+                    return _self.$.itmSettings.removesettings(_self.traceCpu);
+                }).then(function(){
+                    return _self.$.itmSettings.applysettings(_self.traceCpu);
+                }).then(function(){
+                    return _self.ta.cloudTrace.startTraceCapture(_self.traceOp);
+                }).then(function(){
+                    _self.traceStatus = "Capturing Profiling Data ... ";
+                });
+
+                return promise;
+            },
+
+            stopCallback : undefined,
+
+            _stopCallback : function() {
+                this._stopCapture();
+            },
+
+            _stopCapture : function() {
+                //this.destroyItm();
+                var _self = this;
+                var stat = "Complete";
+                _self.traceStatus = "Capture Complete";
+                this.ta.cloudTrace.stopTraceCapture(this.traceOp).then(function() {
+                    _self.traceStatus = "Reading Captured Data ...";
+                    _self.$.progress.open();
+                    return _self.ta.cloudTrace.bufferItmTraceData(_self.traceOp);
+                }).then(function (ret) {
+                    _self.traceStatus = "Read Complete";
+                    _self.numRecordsRead = ret.numRead;
+                    _self.rawTraceRead = true;
+                    _self.statfuncUsecaseRead = true;
+                    _self.varUsecaseRead = true;
+                    _self.excUsecaseRead = true;
+                    _self.swmsgUsecaseRead = true;
+                    return _self.readRawTrace();
+                }).then(function(){
+                    return _self.readTraceStatFuncProfiling();
+                }).then (function(){
+                    return _self.readTraceExceptionProfiling();
+                }).then (function(){
+                    return _self.readTraceDataVariableProfiling();
+                }).then (function(){
+                    return _self.readTraceSwMsgProfiling();
+                }).catch(function(){
+                    stat = "Failed!";
+                }).finally(function(){
+                    _self.traceStatus = "Profile Generation " + stat;
+                    _self.$.itmSettings.removesettings(_self.traceCpu).then(function(){
+                    }).finally(function(){
+                        _self.$.progress.close();
+                    });
+                });
+            },
+
+            cleanup : undefined,
+
+            _cleanup : function() {
+                var _self = this;
+                var promise = Q.resolve();
+
+                promise = promise.then(function(){
+                    if (_self.captureEnabled)
+                    {
+                        return _self.ta.cloudTrace.stopTraceCapture(_self.traceOp)
+                    }
+                    else {
+                        return;
+                    }
+                }).finally(function(){
+                    return _self.$.itmSettings.removesettings(_self.traceCpu);
+                });
+            },
+
+            ready: function() {
+                this.configureItm = this._configureItm.bind(this);
+                this.evtCallback = this._evtCallback.bind(this);
+                this.destroyItm = this._destroyItm.bind(this);
+                this.tabClickCallback = this._tabClickCallback.bind(this);
+
+                this.toggleSettings = this._toggleSettings.bind(this);
+                this.startCallback = this._startCallback.bind(this);
+                this.stopCallback = this._stopCallback.bind(this);
+
+                this.cleanup = this._cleanup.bind(this);
+
+                this.connectToCore = this._connectToCore.bind(this);
+
+                this.syncCpu = true;
+
+            },
+
+            attached: function(){
+                //window.onbeforeunload = this.cleanup;
+                this._toggleSettings();
+            },
+
+            detached: function() {
+                this.$.itmSettings.removesettings(_self.traceCpu);
+            },
+
+            connectToCore : undefined,
+
+            _connectToCore : function(core) {
+                return this.$.tm.connectToCore(core);
+            }
+        });
+    </script>
+
+    </dom-module>
+</body>
+
+</html>

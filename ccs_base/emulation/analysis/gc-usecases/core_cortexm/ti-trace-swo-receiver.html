@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<link rel="import" href="../components/polymer/polymer.html">
+<script src="../components/webcomponentsjs/webcomponents-lite.min.js"></script>
+<link rel="import" href="../components/ti-core-stylesheets/ti-core-stylesheets.html">
+<link rel="import" href="../components/ti-widget-common/ti-widget-table.html">
+<link rel="import" href="../components/ti-widget-common/ti-widget-droplist.html">
+<link rel="import" href="../components/ti-widget-common/ti-widget-input.html">
+<link rel="import" href="../components/ti-widget-common/ti-widget-container.html">
+<link rel="import" href="../components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../components/ti-widget-card/ti-widget-card.html">
+<link rel="import" href="../components/paper-checkbox/paper-checkbox.html">
+<link rel="import" href="../components-dbgtrc/ti-trace-model/ti-trace-model.html">
+<link rel="import" href="../components-dbgtrc/ti-trace-common/ti-trace-progress.html">
+<link rel="import" href="../components-dbgtrc/ti-trace-common/ti-trace-common-style.html">
+</head>
+
+<body class="ti-theme" unresolved>
+    <dom-module id='ti-trace-swo-receiver'>
+        <template>
+            <style include="ti-trace-common-style"> </style>
+            <style>
+                html {
+                    margin: 0px;
+                    padding: 0px;
+                }
+                body {
+                    padding: 0px;
+                    margin: 0;
+                    border: 0;
+                }
+                table {
+                    font-size: 14px;
+                    padding: 0px;
+                    margin: 0px;
+                }
+                td {
+                    text-align: left;
+                    padding: 1px;
+                    padding-left: 16px;
+                }
+                #ti_widget_input1 {
+                    font-size: 14px;
+                }
+
+            </style>
+
+            <paper-card heading="">
+                <div id="title" class="title">
+                    <paper-icon-button id="expandButton" slot="top" icon="expand-more" on-click="_toggle"></paper-icon-button>
+                    Export Interface Configuration
+                </div>
+                <iron-collapse id="collapse">
+                    <div id="desc" class="desc">
+                        The data is exported over Serial Wire Output interface(SWO). Configure the SWO properties for UART mode.
+                    </div>
+                    <div id="params" class="params">
+                        <table>
+                            <tr>
+                                <td>
+                                    COM Port:
+                                </td>
+                                <td>
+                                    <ti-widget-droplist labels="COM 7"></ti-widget-droplist>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    System Clock:
+                                </td>
+                                <td>
+                                    <paper-checkbox label="Auto detect" checked="{{autoSystemClock}}" on-checked-changed="_autoSystemClockChanged"></paper-checkbox>
+                                </td>
+                                <td>
+                                    <ti-widget-input id="ti_widget_input1" floating-label="true" disabled="{{autoSystemClock}}" label="Enter Frequency in Hz..." value={{systemClockDefaultValue}} on-value-changed="_systemClockValueChanged" class="_TI_" one flex></ti-widget-input>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Prescalar:
+                                </td>
+                                <td>
+                                    <paper-checkbox label="Auto configure" checked={{autoPrecalar}} on-checked-changed="_autoPrescalarChanged"></paper-checkbox>
+                                </td>
+                                <td>
+                                    <ti-widget-input id="ti_widget_input1" floating-label="true" disabled={{autoPrecalar}} label="Enter Prescalar..." value={{prescalarDefaultValue}} on-value-changed="_prescalarValueChanged" class="_TI_" one flex></ti-widget-input>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </iron-collapse>
+            </paper-card>
+
+        </template>
+
+        <script>
+            Polymer({
+                is : 'ti-trace-swo-receiver',
+                properties : {
+                    config : {
+                        type: Array,
+                        value: (function(){
+                            return [
+                                {
+                                    name: "Receiver Settings",
+                                    sub_properties: [
+                                        {
+                                            name: "Receiver",
+                                            type: "String",
+                                            value: "SWO Trace",
+                                            sub_properties: [
+                                                {name: "Encoding Type", type: "String", value: "UART"},
+                                                {name: "COM Port", type: "String", value: ""},
+                                                {name: "System Clock", type: "String", value: "Manual"},
+                                                {name: "(Frequency in Hz)", type: "String", value: ""},
+                                                {name: "Prescalar", type: "String", value: "Auto"},
+                                                {name: "", type: "String", value: ""},
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ];
+                        }),
+                        notify: true,
+                        reflectToAttribute: true,
+                    },
+
+                    autoPrecalar: {
+                        type: Boolean,
+                        value: true,
+                        notify: true,
+                        reflectToAttribute: true,
+                    },
+
+                    autoSystemClock: {
+                        type: Boolean,
+                        value: false,
+                        notify: true,
+                        reflectToAttribute: true,
+                    },
+
+                    systemClockValue: {
+                        type: String,
+                        value: "0",
+                        notify: true,
+                        reflectToAttribute: true,
+                    },
+
+                    systemClockDefaultValue: {
+                        type: String,
+                        value: "10000000",
+                    },
+
+                    prescalarDefaultValue: {
+                        type: String,
+                        value: "",
+                    },
+
+                },
+
+                _autoPrescalarChanged: function(evt) {
+                    if (evt.detail.value) {
+                        this.config[0].sub_properties[0].sub_properties[4].value = "Auto";
+                    }
+                    else {
+                        this.config[0].sub_properties[0].sub_properties[4].value = "Manual";
+                    }
+                },
+
+                _autoSystemClockChanged: function(evt) {
+                    if (evt.detail.value) {
+                        this.config[0].sub_properties[0].sub_properties[2].value = "Auto";
+                    }
+                    else {
+                        this.config[0].sub_properties[0].sub_properties[2].value = "Manual";
+                    }
+                },
+
+                _systemClockValueChanged: function(evt) {
+                    this.config[0].sub_properties[0].sub_properties[3].value = evt.detail.value;
+                },
+
+                _prescalarValueChanged: function(evt) {
+                    this.config[0].sub_properties[0].sub_properties[5].value = evt.detail.value;
+                },
+
+                _icon: function(expanded)
+                {
+                    return expanded ? 'expand-less' : 'expand-more';
+                },
+
+                _toggle: function(evt) {
+                    this.$.collapse.toggle();
+                    this.$.expandButton.setAttribute('aria-expanded', this.$.collapse.opened);
+                    this.$.expandButton.icon = this._icon(this.$.collapse.opened);
+                },
+
+                ready : function () {
+                    this.config[0].sub_properties[0].sub_properties[3].value = this.systemClockDefaultValue;
+                    this.config[0].sub_properties[0].sub_properties[5].value = this.prescalarDefaultValue;
+                }
+            });
+        </script>
+    </dom-module>
+</body>
+
+</html>

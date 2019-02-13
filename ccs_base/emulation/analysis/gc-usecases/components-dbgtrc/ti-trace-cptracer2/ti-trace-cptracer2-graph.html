@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="import" href="../../components/polymer/polymer.html"/>
+    <script src="../../components/webcomponentsjs/webcomponents-lite.js"></script>
+    <link rel="import" href="../../components/ti-core-stylesheets/ti-core-stylesheets.html">
+    <link rel="import" href="../../components/ti-widget-common/ti-widget-toggle-button.html">
+    <link rel="import" href="../../components/ti-widget-common-behaviors/ti-widget-common-behaviors.html">
+    <link rel="import" href="../../components-dbgtrc/ti-trace-graphs/ti-trace-graph.html">
+    </head>
+<body unresolved class="ti-theme">
+<dom-module id="ti-trace-cptracer2-graph">
+    <template>
+
+      <style>
+      </style>
+      <ti-widget-toggle-button id="modeToggle" label=[[toggleLabel]] checked={{toggleChecked}} tooltip="Switch between latency and throughput data if both use cases were enabled."></ti-widget-toggle-button>
+      <ti-trace-graph id="vargraph" data=[[data]] labels=[[labels]] title=[[title]] xlabel=[[xlabel]] ylabel=[[ylabel]] include-zero=[[includeZero]] highlight-series-opts=[[highlightSeriesOpts]]  point-size=1 stroke-width=1></ti-trace-graph>
+
+    </template>
+    <script>
+    Polymer({
+        is: 'ti-trace-cptracer2-graph',
+
+        properties: {
+            data: {
+                type: Array,
+                notify: true,
+                reflectToAttribute: true,
+                value: []
+            },
+            labels: {
+                type: Array,
+                notify: true,
+                reflectToAttribute: true,
+                value: []
+            },
+            title: {
+                type: String,
+                value: "",
+                reflectToAttribute: true,
+            },
+            ylabel: {
+                type: String,
+                value: "Column Data",
+                reflectToAttribute: true,
+            },
+            xlabel: {
+                type: String,
+                value: "Timestamp",
+                reflectToAttribute: true,
+            },
+            includeZero: {
+                type: Boolean,
+                value: false,
+                reflectToAttribute: true,
+            },
+            highlightSeriesOpts: {
+                type: Object,
+                notify: true,
+                reflectToAttribute: true,
+                value: {
+                    strokeWidth: 3,
+                }
+            },
+            traceData: {
+                notify: true,
+                type: Array,
+                value: [],
+                observer: '_traceDataChanged'
+            },
+            throughputData: {
+                notify: true,
+                type: Array,
+                value: []
+            },
+            latencyData: {
+                notify: true,
+                type: Array,
+                value: []
+            },
+            toggleLabel: {
+                notify: true,
+                type: String,
+                value: "Toggle Throughput / Latency"
+            },
+            toggleChecked: {
+                notify: true,
+                type: Boolean,
+                reflectToAttribute: true,
+                value: false,
+                observer: '_toggleChecked'
+            }
+        },
+
+        resize: function() {
+          this.$.vargraph._resize();
+        },
+
+        attached: function() {
+            var _self = this;
+
+            _self._setGraphNoData();
+        },
+
+        ready: function() {
+            var _self = this;
+            _self._setGraphNoData();
+        },
+
+        _setGraphNoData: function() {
+            var _self = this;
+            _self.title = "No data available."
+            _self.resize();
+        },
+
+        _traceDataChanged: function(newVal) {
+
+            var _self = this;
+            var throughputdata = [];
+            var latencydata = [];
+            var isThroughputMode = false;
+
+            if (!(newVal instanceof Array)) {
+                return;
+            }
+            
+            for (var i = 0; i < newVal.length; i++) {
+
+                var time = null;
+
+                // Throughput
+                var bytetrans = null;
+                var matchedtrans = null;
+                var avglen = null;
+
+                // Latency
+                var tracked = null;
+                var matched = null;
+                var maxwait = null;
+                var totalwait = null;
+                var creditwait = null;
+               
+                if (typeof(newVal[i].time) !== 'undefined') {
+                    time = newVal[i].time;
+                }
+               
+                if (typeof(newVal[i].datamsg) !== 'undefined') {
+                    if (newVal[i].datamsg.toLowerCase().indexOf("throughput") !== -1) {
+                        if (typeof(newVal[i].bytetrans) !== 'undefined') {
+                            bytetrans = newVal[i].bytetrans;
+                        }
+                        if (typeof(newVal[i].matchedtrans) !== 'undefined') {
+                            matchedtrans = newVal[i].matchedtrans;
+                        }
+                        if (typeof(newVal[i].avglen) !== 'undefined') {
+                            avglen = newVal[i].avglen;
+                        }
+                        throughputdata.push([time, bytetrans, matchedtrans, avglen]);
+                    }
+                    else if (newVal[i].datamsg.toLowerCase().indexOf("latency") !== -1) {
+                        if (typeof(newVal[i].tracked) !== 'undefined') {
+                            tracked = newVal[i].tracked;
+                        }
+                        if (typeof(newVal[i].matched) !== 'undefined') {
+                            matched = newVal[i].matched;
+                        }
+                        if (typeof(newVal[i].maxwait) !== 'undefined') {
+                            maxwait = newVal[i].maxwait;
+                        }
+                        if (typeof(newVal[i].totalwait) !== 'undefined') {
+                            totalwait = newVal[i].totalwait;
+                        }
+                        if (typeof(newVal[i].creditwait) !== 'undefined') {
+                            creditwait = newVal[i].creditwait;
+                        }
+                        latencydata.push([time, tracked, matched, maxwait, totalwait, creditwait]);
+                    }
+                }
+            }
+            
+            _self.latencyData = latencydata;
+            _self.throughputData = throughputdata;
+        
+            isThroughputMode = true;
+            if ((_self.throughputData.length == 0) && (_self.latencyData.length > 0)) {
+                isThroughputMode = false;
+            }
+
+            if (isThroughputMode) {
+                _self.$.toggleChecked = false;
+                _self._toggleChecked(false);
+            }
+            else {
+                _self.$.toggleChecked = true;
+                _self._toggleChecked(true);
+            }
+
+        },
+
+        _toggleChecked: function(isLatency) {
+
+            var _self = this;
+
+            if ((typeof(_self.traceData.length) == 'undefined') || (_self.traceData.length == 0)) {
+                _self._setGraphNoData();
+                return;
+            }
+
+            if (isLatency) {
+                _self.labels = ["Timestamp","Tracked", "Matched", "Max Wait", "Total Wait", "Credit Wait"];
+                _self.data = _self.latencyData;
+            }
+            else {
+                _self.labels = ["Timestamp","Byte Transactions", "Matched Transactions", "Average Length"];
+                _self.data = _self.throughputData;
+            }
+
+            _self.resize();
+
+        }
+
+        });
+    </script>
+</dom-module>
+</body>
+</html>

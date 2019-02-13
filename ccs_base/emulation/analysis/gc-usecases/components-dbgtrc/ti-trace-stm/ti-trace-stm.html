@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<!--
+    Copyright (c) 2018, Texas Instruments Incorporated
+    All rights reserved.
+
+    Redistribution and use in source and binary forms, with or without
+    modification, are permitted provided that the following conditions
+    are met:
+
+    *   Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+    *   Neither the name of Texas Instruments Incorporated nor the names of
+    its contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+    AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+    THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+    PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+    CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+    EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+    PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+    OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+    WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+    OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+    EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-->
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<script src="../../components/webcomponentsjs/webcomponents-lite.min.js"></script>
+
+<link rel="import" href="../../components/iron-icons/hardware-icons.html">
+<link rel="import" href="../../components/polymer/polymer.html">
+<link rel="import" href="../../components/ti-core-stylesheets/ti-core-stylesheets.html">
+<link rel="import" href="../../components/ti-widget-common/ti-widget-dialog.html">
+<link rel="import" href="../../components/ti-widget-common/ti-widget-label.html">
+<link rel="import" href="../../components/ti-widget-common/ti-widget-tab.html">
+<link rel="import" href="../../components/ti-widget-common/ti-widget-tabcontainer.html">
+<link rel="import" href="../../components/ti-widget-icon-button/ti-widget-icon-button.html">
+<link rel="import" href="../ti-trace-common/ti-trace-common-style.html">
+<link rel="import" href="../ti-trace-common/ti-trace-menubar.html">
+<link rel="import" href="../ti-trace-common/ti-trace-progress.html">
+<link rel="import" href="../ti-trace-model/ti-trace-model.html">
+<link rel="import" href="../ti-trace-stm/ti-trace-stm-settings.html">
+<link rel="import" href="../ti-trace-stm/ti-trace-stm-table.html">
+<link rel="import" href="../ti-trace-swmsg/ti-trace-swmsg-view.html">
+
+
+</head>
+<body class="ti-theme" unresolved>
+    <dom-module id='ti-trace-stm'>
+        <template>
+            <style include="ti-trace-common-style"> </style>
+            <style>
+                html {
+                    margin: 0px;
+                    padding: 0px;
+                }
+                body {
+                    padding: 0;
+                    margin: 0;
+                    border: 0;
+                }
+                #menuBar {
+                    display: flex;
+                    width: 100%;
+                    height: 40px;
+                }
+                #traceDataContainer {
+                    position:absolute;
+                    width: 100%;
+                    height: 100%;
+                }
+                button {
+                  display: block;
+                  line-height: 40px;
+                  background-color: transparent;
+                  border: none;
+                  font-size: 14px;
+                  margin: 20px;
+                }
+            </style>
+            <custom-style>
+                <style is="custom-style">
+                    paper-tabs[no-bar] paper-tab.iron-selected {
+                        color: #ff0000;
+                    }
+                </style>
+            </custom-style>
+
+            <ti-trace-model id="tm" device-id="{{devId}}" trace-agent="{{ta}}" active-core="{{activeCore}}" device-info="{{deviceInfo}}"></ti-trace-model>
+            <ti-trace-progress id="progress" status="[[traceStatus]]"></ti-trace-progress>
+            <ti-trace-stm-settings id="settings"></ti-trace-stm-settings>
+            <ti-trace-menubar id="menuBar" open-settings=[[toggleSettings]] status-msg=[[traceStatus]] num-records=[[numRecordsRead]] num-gaps=[[numGaps]]  start-callback="{{startTrace}}" stop-callback="{{stopTrace}}"></ti-trace-menubar>
+            
+            <ti-widget-tabcontainer id="traceDataContainer" selected-index="0" selected-label="Setup" layout on-selected_tab_changed="tabClickCallback">
+                <ti-widget-tab id="swMsgView"  class="tracedataview" name="Console View" icon="hardware:computer" tooltip="click to view the software messages">
+                    <ti-trace-swmsg-view msg="[[swMsgTraceData]]" channel-color="{{swmsgChanColor}}"></ti-trace-swmsg-view>
+                </ti-widget-tab>
+                <ti-widget-tab id="stmTable" class="tracedataview" name="Raw Data" icon="icons:view-column" tooltip="click to view the raw data">
+                    <ti-trace-stm-table id='stm' data="[[traceData]]"></ti-trace-stm-table>        
+                </ti-widget-tab>
+            </ti-widget-tabcontainer>
+
+        </template>
+        <script>
+            Polymer({
+                is: 'ti-trace-stm',
+                properties: {
+                    activeCore: {
+                        notify: true,
+                        type: String,
+                        reflectToAttribute: true,
+                        value: undefined
+                    },
+                    systemStm: {
+                        type: String,
+                        value: undefined
+                    },
+                    deviceInfo : {
+                        notify: true,
+                        type: String,
+                        reflectToAttribute: true,
+                        value: undefined,
+                        observer: '_deviceInfoChanged'
+                    },
+                    traceOp : {
+                        notify: true,
+                        type: Number,
+                        reflectToAttribute: true,
+                        value: undefined
+                    },
+                    aetOp : {
+                        notify: true,
+                        type: Number,
+                        reflectToAttribute: true,
+                        value: undefined
+                    },
+                    ta : {
+                        notify: true,
+                        type: Object,
+                        reflectToAttribute: true
+                    },
+                    devId : {
+                        notify: true,
+                        type: Number,
+                        reflectToAttribute: true
+                    },
+                    traceProperties : {
+                        type: Array,
+                        value: undefined,
+                        notify: true,
+                        reflectToAttribute: true
+                    },
+                    aetProperties : {
+                        type: Array,
+                        valuie: undefined,
+                        notify: true,
+                        reflectToAttribute: true
+                    },
+                    traceEnabled: {
+                        notify: true,
+                        reflectToAttribute: true,
+                        type: Boolean,
+                        value: undefined,
+                        observer: "_enabledChanged"
+                    },
+                    traceStatus : {
+                        notify: true,
+                        reflectToAttribute: true,
+                        type: String,
+                        value: ""
+                    },
+                    numRecordsRead : {
+                        notify: true,
+                        reflectToAttribute: true,
+                        type: String,
+                        value: "0"
+                    },
+                    numGaps : {
+                        notify: true,
+                        reflectToAttribute: true,
+                        type: String,
+                        value: "0"
+                    },
+                    traceData : {
+                        notify: true,
+                        reflectToAttribute: true,
+                        type: Array,
+                        value: undefined,
+                        observer: '_traceDataChanged'
+                    },
+                    rawDataTabName: {
+                        notify: true,
+                        reflectToAttribute: true,
+                        type: String,
+                        value: "Raw Data",
+                    },
+                    consoleDataTabName: {
+                        notify: true,
+                        reflectToAttribute: true,
+                        type: String,
+                        value: "Console View",
+                    },
+                    captureEnabled: {
+                        type: Boolean,
+                        value: false,
+                    },
+                    swMsgTraceData: {
+                        notify: true,
+                        reflectToAttribute: true,
+                        type: Array,
+                        value: []
+                    },
+                    swmsgChanColor: {
+                        type: Array,
+                        reflectToAttribute: true,
+                        notify: true,
+                        value: []
+                    },
+                    coresConnected: {
+                        type: Boolean,
+                        value: false
+                    }
+                },
+
+                _deviceInfoChanged: function(info) {
+
+                    var _self = this;
+                    var cores = [];
+
+                    _self.systemStm = undefined;
+
+                    for (let cluster of _self.deviceInfo.children) {
+                        for (let node of cluster.children) {
+                            if (node.local_name == "SystemStm") {
+                                var nodeObj = {
+                                    name: node.name,
+                                    local_name: node.local_name,
+                                    type: node.type
+                                }
+                                cores.push(nodeObj);
+
+                                _self.systemStm = node.name;
+                            }
+                            else if (node.type == "Trace Buffer") {
+                                var nodeObj = {
+                                    name: node.name,
+                                    local_name: node.local_name,
+                                    type: node.type
+                                }
+                                cores.push(nodeObj);
+                            }
+                        }
+                    }
+
+                    _self._connectToCores(cores).then(function() {
+                        _self.coresConnected = true;
+                    }).catch(function (err){
+                        console.log("Failed to connect to STM or trace buffers." + JSON.stringify(err));
+                    }).finally(function() {
+                        _self.$.progress.close();
+                    });
+
+                },
+
+                _enabledChanged: function (newVal, oldVal)
+                {
+                    if (oldVal === undefined) {
+                        return;
+                    }
+                    if (!newVal && oldVal)
+                    {
+                        var _self = this;
+
+                        this.ta.cloudTrace.stopTraceCapture(_self.traceOp).then(function() {
+                            _self.haltTrace();
+                        });
+                    }
+                },
+
+                _connectToCores: function (cores)
+                {
+                    if (cores.length === 0) {
+                        var p = Q.defer();
+                        p.resolve(null);
+                        return p.promise;
+                    } else {
+                        var core = cores.shift();
+                        var _self = this;
+                        return this.$.tm.connectToCore(core.name).then (function () {
+                            return _self._connectToCores(cores);
+                        }).catch(function (e) {
+                            console.log("Failed to connect to core: "+JSON.stringify(e));
+                        });
+                    }
+                },
+
+                evtCallback: undefined,
+
+                _evtCallback: function(info)
+                {
+                    console.log("Event received: " + JSON.stringify(info));
+                    if (info.eventName === "Halt")
+                    {
+                        console.log("Target PreRun");
+                    } else if (info.eventName == "PreRun")
+                    {
+                        console.log("Target PreRun");
+                    }
+                },
+
+                startTrace: undefined,
+
+                _startTrace: function()
+                {
+                    var _self = this;
+                    var traceCreated = false;
+                    
+                    _self.cores = [];
+
+                    console.log("configuring");
+
+                    _self.traceData = undefined;
+                    _self.$.progress.open();
+                    _self.ta.cloudTrace.addListener("targetEvent", _self.evtCallback);
+
+                    _self.ta.cloudTrace.isTargetConnected(_self.systemStm).then(function(ret) {
+                        if (!ret.connected)
+                        {
+                            return _self.ta.cloudTrace.connectTarget(_self.systemStm).then(function(){
+                                return _self.ta.cloudTrace.enableTargetEvents(_self.systemStm);
+                            });
+                        }
+                        return _self.ta.cloudTrace.enableTargetEvents(_self.systemStm);
+                    }).then(function () {
+                        return _self._connectToCores(_self.cores);
+                    }).then(function () {
+                        return _self.ta.cloudTrace.setPreRunTimeout(60000);
+                    }).then(function() {
+                        return _self.ta.cloudTrace.enableTargetPreRunEvent(_self.systemStm);
+                    }).then(function () {
+                        return _self.ta.cloudTrace.createOperation(_self.systemStm,"Trace");
+                    }).then(function (ret) {
+                        _self.traceOp = ret.handle;
+                        _self.traceStatus = "Configuring Trace Operation";
+                        //return _self.ta.cloudTrace.setProperties(_self.traceOp, _self.traceProperties);
+                    }).then(function (ret) {
+                        return _self.ta.cloudTrace.getProperties(_self.traceOp);
+                    }).then(function (ret) {
+                        _self.traceProperties = ret.cfg;
+                        return _self.ta.cloudTrace.createOperation(_self.systemStm,"AET");
+                    }).then(function (ret) {
+                        _self.aetOp = ret.handle;
+                        return _self.ta.cloudTrace.getProperties(_self.aetOp)
+                    }).then(function (ret) {
+                        aetProperties = ret.cfg;
+                        //Set System Trace Type to STM Software Messages
+                        aetProperties[0].sub_properties[0].value = "STM Software Messages";
+                        return _self.ta.cloudTrace.setProperties(_self.aetOp, aetProperties)
+                    }).then(function (ret) {
+                        _self.traceStatus = "Enabling Trace Operation";
+                        return _self.ta.cloudTrace.setEnableOperation(_self.traceOp, true);
+                    }).then(function (ret) {
+                        _self.traceStatus = "Enabling AET Operation";
+                        return _self.ta.cloudTrace.setEnableOperation(_self.aetOp, true);
+                    }).then(function (ret) {
+                        _self.traceStatus = "Creating Trace Decoder";
+                        return _self.ta.cloudTrace.createTrace(_self.traceOp);
+                    }).then(function (ret) {
+                        traceCreated = true;
+                        _self.traceStatus = "Enabling trace capture...";
+                        return _self.ta.cloudTrace.startTraceCapture(_self.traceOp);
+                    }).then(function () {
+                        return _self.ta.cloudTrace.disableTargetPreRunEvent(_self.systemStm);
+                    }).then(function () {
+                        _self.traceStatus = "Trace capture enabled";
+                        return _self.ta.cloudTrace.preRunComplete();
+                    }).then(function () {
+                        _self.captureEnabled = true;
+                    }).catch(function (err){
+                        console.log("Operation failed" + JSON.stringify(err));
+
+                        _self.$.menuBar.setStartIcon();
+                        var handle = _self.traceOp;
+                        _self.traceOp = undefined;
+                        _self.traceStatus = "Trace Generation Error - Operation Cancelled";
+                        if (traceCreated) {
+                            _self.ta.cloudTrace.destroyTrace(handle).then(function (val) {
+                                _self.ta.cloudTrace.releaseOperation(handle);
+                            });
+                        } else if (handle !== undefined) {
+                            _self.ta.cloudTrace.releaseOperation(handle);
+                        }
+    
+                        handle = _self.aetOp;
+                        _self.aetOp = undefined;
+                        if (handle !== undefined) {
+                            _self.ta.cloudTrace.releaseOperation(handle);
+                        }
+
+                    }).finally(function() {
+                        _self.$.progress.close();
+                    });
+                },
+
+                stopTrace: undefined,
+
+                _stopTrace: function ()
+                {
+                    var _self = this;
+                    if (this.captureEnabled) {
+                        
+                        this.captureEnabled = false;
+                        
+                        _self.ta.cloudTrace.stopTraceCapture(_self.traceOp).then(function() {
+                            _self.$.progress.open();
+                            _self.traceStatus = "Reading Trace Data...";
+                            return _self.ta.cloudTrace.readTraceDataByType(_self.traceOp, "STM");
+                        }).then(function (ret) {
+                            _self.$.progress.close();
+                            _self.traceStatus = "Read complete";
+                            _self.numRecordsRead = ret.numRead;
+                            _self.traceData = ret.table.data;
+                        }).catch(function (err) {
+                            _self.traceStatus = "Error Reading Trace Data";
+                            console.log("Failure: "+JSON.stringify(err));
+                        }).finally(function (val) {      
+                            _self.ta.cloudTrace.destroyTrace(_self.traceOp);
+                            _self.traceOp = undefined;
+                            _self.ta.cloudTrace.destroyTrace(_self.aetOp);
+                            _self.aetOp = undefined;
+                        });
+                    }
+                },
+
+                _traceDataChanged: function (data) {
+                    var _self = this;
+                    var swMsgTraceData = [];
+                    
+                    var gaps = 0;
+                    
+                    if (!(data instanceof Array)) {
+                        return;
+                    }
+                    
+                    for (var i = 0; i < data.length; i++) {
+
+                        var channel = undefined;
+                        var timestamp = undefined;
+                        var mastername = undefined;
+                        var dataField = undefined;
+                        var dataMsgField = undefined;
+                        var formattedmsg = undefined;
+
+                        if (typeof(data[i].chnum) !== 'undefined') {
+                            channel = data[i].chnum;
+                        }
+                        if (typeof(data[i].mastname) !== 'undefined') {
+                            mastername = data[i].mastname;
+                        }
+                        if (typeof(data[i].time) !== 'undefined') {
+                            timestamp = data[i].time;
+                        }
+                        if (typeof(data[i].data) !== 'undefined') {
+                            dataField = data[i].data;
+                        }
+                        if (typeof(data[i].datamsg) !== 'undefined') {
+                            dataMsgField = data[i].datamsg;
+                        }
+                        if (typeof(data[i].tracestatus) !== 'undefined') {
+                            if ((data[i].tracestatus.toLowerCase().indexOf("fifo") !== -1) ||
+                                (data[i].tracestatus.toLowerCase().indexOf("bad") !== -1) ||
+                                (data[i].tracestatus.toLowerCase().indexOf("bad") !== -1)) {
+                                gaps++;
+                            }
+                        }
+                        
+                        if ((dataField == undefined) &&
+                            (dataMsgField == undefined)) {
+                            // Nothing to print
+                            continue;
+                        }
+                        else if ((dataField != undefined) && 
+                                (dataMsgField == undefined)) {
+                            formattedmsg = dataField;
+                        }
+                        else if ((dataField == undefined) && 
+                                (dataMsgField != undefined)) {
+                            formattedmsg = dataMsgField;
+                        }
+                        else if ((dataField != undefined) && 
+                                (dataMsgField != undefined)) {
+                            formattedmsg = "DMSG: "+dataMsgField+"; DATA: "+dataField;
+                        }
+                        
+                        swMsgTraceData.push([timestamp, channel, formattedmsg]);                        
+
+                    }
+
+                    _self.swMsgTraceData = swMsgTraceData;
+                    _self.numGaps = gaps;
+                },
+
+                tabClickCallback: undefined,
+
+                _tabClickCallback: function(evt) {
+                    var _self = this;
+                    var tabIndex = evt.detail["selectedIndex"];
+                    var childTab = _self.$.traceDataContainer.getChildTab(tabIndex);
+                    switch(childTab.innerText)
+                    {
+                        case _self.rawDataTabName:
+                            break;
+                        case _self.consoleDataTabName:
+                            break;
+                        default:
+                        break;
+                    }
+                },
+
+                toggleSettings : undefined,
+
+                _toggleSettings : function(){
+                    var _self = this;
+                   
+                    _self.$.settings.open();
+                },
+
+                ready: function() {
+
+                    this.evtCallback = this._evtCallback.bind(this);
+                    this.startTrace = this._startTrace.bind(this);
+                    this.stopTrace = this._stopTrace.bind(this);
+                    this.tabClickCallback = this._tabClickCallback.bind(this);
+                    this.toggleSettings = this._toggleSettings.bind(this);
+                    
+                    this.startStopState = "Start";
+                },
+
+                detatched: function() {
+                    if (_self.traceOp !== undefined) {
+                        var handle = _self.traceOp;
+
+                        _self.traceOp = undefined;
+                        ta.cloudTrace.releaseOperation(handle);
+
+                        handle = _self.aetOp;
+                        _self.aetOp = undefined;
+                        ta.cloudTrace.releaseOperation(handle);
+                    }
+                }
+            });
+        </script>
+    </dom-module>
+</body>
+</html>

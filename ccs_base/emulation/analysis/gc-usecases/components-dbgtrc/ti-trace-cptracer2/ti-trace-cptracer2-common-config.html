@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<script src="../../components/webcomponentsjs/webcomponents-lite.min.js"></script>
+
+
+<link rel="import" href="../../components/iron-collapse/iron-collapse.html">
+<link rel="import" href="../../components/paper-card/paper-card.html">
+<link rel="import" href="../../components/paper-tooltip/paper-tooltip.html">
+<link rel="import" href="../../components/polymer/polymer.html">
+<link rel="import" href="../../components/ti-core-stylesheets/ti-core-stylesheets.html">
+<link rel="import" href="../../components/ti-widget-common/ti-widget-checkbox.html">
+<link rel="import" href="../../components/ti-widget-common/ti-widget-droplist.html">
+<link rel="import" href="../../components/ti-widget-common/ti-widget-listbox.html">
+<link rel="import" href="../../components/ti-widget-common/ti-widget-table.html">
+<link rel="import" href="../../components-dbgtrc/ti-trace-model/ti-trace-model.html">
+<link rel="import" href="../../components-dbgtrc/ti-trace-common/ti-trace-common-style.html">
+<link rel="import" href="../../components-dbgtrc/ti-trace-common/ti-trace-progress.html">
+
+</head>
+
+<body class="ti-theme" unresolved>
+    <dom-module id='ti-trace-cptracer2-common-config'>
+        <template>
+            <style include="ti-trace-common-style"> </style>
+            <style>
+                html {
+                    margin: 0px;
+                    padding: 0px;
+                }
+                body {
+                    padding: 0px;
+                    margin: 0;
+                    border: 0;
+                }
+
+                .align-content {
+                    text-align: left;
+                    padding: 5px;
+                    padding-left: 16px;
+                    font-size: 14px;
+                }
+            </style>
+
+            <paper-card heading="">
+                <div id="title" class="title">
+                    <paper-icon-button id="expandButton" slot="top" icon="expand-more" on-click="_toggle"></paper-icon-button>
+                    Common Configuration
+                </div>
+                <iron-collapse id="collapse">
+                    <div id="desc" class="desc">
+                        These settings are common and apply to all of the profiling usecases.
+                    </div>
+                    <div id="params" class="params">
+                        <table>
+                            <tr>
+                                <td colspan="3">&nbsp;</td>
+                            </tr>
+
+                            <tr>
+                                <td calss=align-content>
+                                    <div id="desc" class="desc">
+                                        <p>
+                                            Select the probe domain to monitor. <br />
+                                            Each probe domain contains a set a available probes shown below. <br />
+                                            Only one probe domain can be enabled at a time. <br />
+                                            Individual probes may only be selected for one usecase (throughput/latency/transaction) at a time. <br />
+                                        </p>
+                                    </div>
+                                </td>
+                            </tr>
+                            
+                            <tr>
+                                <td class="align-content">
+                                    <ti-widget-label label="Probe Domain: "></ti-widget-label>
+                                    <ti-widget-droplist id="domainSelectDrop" labels=[[domainLabels]] selected-text={{selectedDomain}} initial-index="0"></ti-widget-droplist>
+                                    <paper-tooltip for="domainSelectDrop" position="left">Select the set of probes to capture trace from.</paper-tooltip>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">
+                                    <ti-widget-table headings="Probe Name,Description" rows=[[probeLabelsTableData]]></ti-widget-table>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="3">&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td class="align-content">
+                                    Select the checkbox below if you would like exclude samples with all zero values from output data.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="align-content">
+                                    <ti-widget-checkbox id="zeroSuppressCheckBox" label="Suppress zeros in data" checked={{zeroSuppress}}></ti-widget-checkbox>
+                                    <paper-tooltip for="zeroSuppressCheckBox" position="right">If checked, data samples containing all zero values will be hidden.</paper-tooltip>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </iron-collapse>
+            </paper-card>
+
+        </template>
+
+        <script>
+            Polymer({
+                is : 'ti-trace-cptracer2-common-config',
+                properties : {
+                    zeroSuppress : {
+                        type: Boolean,
+                        value: false,
+                        notify: true,
+                        reflectToAttribute: true
+                    },
+                    domainLabels : {
+                        type: String
+                    },
+                    selectedDomain : {
+                        type: String,
+                        notify: true,
+                        reflectToAttribute: true,
+                        observer: '_selectedDomainChanged'
+                    },
+                    selectedDomainChanged : {
+                        type: Object,
+                        notify: true
+                    },
+                    probeLabels : {
+                        type: Array,
+                        notify: true,
+                        observer: '_probeLabelsChanged'
+                    },
+                    probeLabelsTableData : {
+                        type: Array,
+                        notify: true
+                    }
+                },
+
+                _icon: function(expanded)
+                {
+                    return expanded ? 'expand-less' : 'expand-more';
+                },
+
+                _toggle: function(evt) {
+                    this.$.collapse.toggle();
+                    this.$.expandButton.setAttribute('aria-expanded', this.$.collapse.opened);
+                    this.$.expandButton.icon = this._icon(this.$.collapse.opened);
+                },
+
+                ready : function () {
+
+                },
+
+                _selectedDomainChanged : function (newVal) {
+                    if (undefined !== this.selectedDomainChanged) {
+                        this.selectedDomainChanged(newVal);       
+                    }
+                },
+
+                _probeLabelsChanged : function () {
+                    
+                    var _self = this;
+                    var returnStr = "";
+
+                    for (var i=0; i < _self.probeLabels.length; i++) {
+                        returnStr += _self.probeLabels[i].name + "," + _self.probeLabels[i].desc + ";";
+                    }
+                    
+                    // Chop off the last semi-colon.
+                    _self.probeLabelsTableData = returnStr.substring(0, returnStr.length - 1);
+                }
+            });
+        </script>
+    </dom-module>
+</body>
+
+</html>

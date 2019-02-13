@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<!--
+    Copyright (c) 2018, Texas Instruments Incorporated
+    All rights reserved.
+
+    Redistribution and use in source and binary forms, with or without
+    modification, are permitted provided that the following conditions
+    are met:
+
+    *   Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+    *   Neither the name of Texas Instruments Incorporated nor the names of
+    its contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+    AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+    THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+    PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+    CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+    E3XEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+    PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+    OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+    WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+    OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+    EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-->
+<html>
+<head>
+<link rel="import" href="../../components/polymer/polymer.html">
+<script src="../../components/webcomponentsjs/webcomponents-lite.js"></script>
+<script type='text/javascript' src="../../components/ti-core-assets/scripts/q.js"></script>
+<link rel="import" href="../../components/web-animations-js/web-animations.min.js">
+<link rel="import" href="../../components/neon-animation/web-animations.html">
+<link rel="import" href="../../components/vaadin-grid/theme/material/vaadin-grid.html">
+<link rel="import" href="../../components/vaadin-grid/theme/material/vaadin-grid-sorter.html">
+<link rel="import" href="../../components/vaadin-grid/theme/material/vaadin-grid-column-group.html">
+<link rel="import" href="../../components/paper-styles/color.html">
+<link rel="import" href="../../components/paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../../components/paper-item/paper-item.html">
+<link rel="import" href="../../components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../../components/paper-tooltip/paper-tooltip.html">
+<link rel="import" href="../../components/paper-toolbar/paper-toolbar.html">
+<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../components/iron-icons/iron-icons.html">
+<!-- <link rel="import" href="../../components/ti-core-stylesheets/ti-core-stylesheets.html"> -->
+<link rel="import" href="../../components/ti-widget-common/ti-widget-checkbox.html">
+<link rel="import" href="../../components/ti-widget-common-behaviors/ti-widget-common-behaviors.html">
+</head>
+<body unresolved class="ti-theme">
+    <dom-module id="ti-trace-table">
+        <template>
+            <style>
+                paper-item {
+                    padding: 0px 10px;
+                    white-space: nowrap;
+                    font-size: 12px;
+                    min-height: 20px;
+                }
+                .page {
+                    height: 100%;
+                    flex: 1;
+                    display: flex;
+                    flex-direction: column;
+                    overflow: auto;
+                    -webkit-overflow-scrolling: touch;
+                }
+                vaadin-grid --vaadin-grid-selected-row {
+                    background-color: #f1f1f1;
+                }
+                /* .traceTabular {
+                    display: flex;
+                    height: 100%;
+                    font-family: courier, monospace;
+                    font-size: 12px;
+                    white-space: normal;
+                    --vaadin-grid-header-cell: {
+                        height: 50px;
+                        font-size: 12px;
+                        white-space: normal;
+                    }
+                    --vaadin-grid-body-row-odd-cell: {
+                        background-color: #f8f8f8;
+                    }
+                    --vaadin-grid-body-cell: {
+                        height: 16px;
+                        font-size: 12px;
+                        white-space: nowrap;
+                        overflow: visible;
+                    }
+                } */
+                paper-menu-button {
+                    padding: 0px;
+                }
+                paper-menu-button > paper-icon-button {
+                    color: white;
+                    padding: 0px;
+                    height: 24px;
+                    width: 24px;
+                }
+                paper-toolbar {
+                    --paper-toolbar-height: 40px;
+                    --paper-toolbar-background: #115566;
+                    --paper-toolbar-title: {
+                        margin: 0px;
+                    }
+                    --paper-toolbar: {
+                        width: 100%
+                        font-family: "Roboto Mono";
+                        -ms-text-size-adjust: 100%;
+                        -webkit-text-size-adjust: 100%;
+                        font-weight: 400;
+                        font-size: 14px;
+                    }
+                }
+
+            </style>
+            <div class="page">
+                <paper-toolbar>
+                    <span slot="bottom" class="bottom" style="width:100%"> <!--slot="bottom" class="title"> -->
+                        <slot></slot>
+                        <span class="bottom" style="float:right" >
+                        <paper-menu-button class="bottom" id="dropdownMenu" vertical-offset="36" dynamic-align disabled on-paper-dropdown-close="_columnSelectionChanged">
+                            <paper-icon-button icon="view-column" slot="dropdown-trigger"></paper-icon-button>
+                            <paper-listbox id="listBox" multi selected-values="{{_selectedColumns}}" slot="dropdown-content">
+                                <template is="dom-repeat" items="[[columnLabels]]" as="col">
+                                    <paper-item>[[col]]</paper-item>
+                                </template>
+                            </paper-listbox>
+                        </paper-menu-button>                            
+                        <paper-tooltip for="dropdownMenu" position="left">Select columns to display</paper-tooltip>
+                            <slot name="right"></slot>
+                        </span>
+                    </span>
+                </paper-toolbar>
+                <vaadin-grid id="traceTable" class="traceTabular" size="0" data-provider="[[dataProvider]]" active-item="{{activeItem}}" column-reordering-allowed>
+                    <template is="dom-repeat" items="{{columnLabels}}" as="col" index-as="indx">
+                        <vaadin-grid-column id="[[_get_column_id(indx)]]" resizable>
+                            <template class="header">[[col]]</template>
+                            <template>
+                                [[_get_value(indx,item)]]
+                                <template is="dom-if" if="[[tooltip]]">
+                                    <paper-tooltip position="right">[[tooltip]]</paper-tooltip>
+                                </template>
+                            </template>
+                        </vaadin-grid-column>
+                    </template>
+                </vaadin-grid>
+            </div>
+        </template>
+        <script>
+            Polymer({
+                is: 'ti-trace-table',
+                properties: {
+                    activeItem: {
+                        notify: true,
+                        reflectToAttribute: true,
+                        value: undefined
+                    },
+                    column: {
+                        type: Array,
+                        value: function() {return [];},
+                        notify: true,
+                        reflectToAttribute: true
+                    },
+                    columnLabels: {
+                        type: Array,
+                        notify: true,
+                        value: function() {return [];},
+                        reflectToAttribute: true,
+                        observer: '_columnLabelsChanged'
+                    },
+                    dataProvider: {
+                        notify: true,
+                        value: undefined
+                    },
+                    tooltip: {
+                        type: String,
+                        value: undefined
+                    },
+                    _selectedColumns: {
+                        type: Array,
+                        value: function() {return [];}
+                    }
+                },
+                _columnSelectionChanged : function() {
+                    var listBox = this.shadowRoot.querySelector("#listBox");
+                    var selection = listBox.selectedValues;
+                    if (selection) {
+                        if (selection.length == 0) {
+                            selection = listBox.selectedValues = [0];
+                        }
+                        for (var i = 0; i < this.columnLabels.length; i++) {
+                            if (this.column[i] === undefined) {
+                                this.column[i] = this.shadowRoot.querySelector("#col"+i);
+                            }
+                            this.column[i].hidden = selection.indexOf(i) < 0;
+                        }
+                    }
+                },
+                _columnLabelsChanged: function (newVal)
+                {
+                    if (newVal.length > 0) {
+                        var indices = [];
+                        for (var i = 0; i < newVal.length; i++) {
+                            indices.push(i);
+                        }
+                        this.shadowRoot.querySelector("#listBox").selectedValues = indices;
+                        var dropdown = this.shadowRoot.querySelector("#dropdownMenu");
+                        dropdown.disabled = false;
+                        dropdown.closeOnActivate = false;
+                        dropdown.ignoreSelect = true;
+                    }
+                },
+                _get_column_id: function(col) {
+                    return 'col'+col;
+                },
+                _get_value: function(col, row) {
+                    return row && row[col];
+                },
+                ready: function() {
+                }
+
+            });
+        </script>
+    </dom-module>
+</body>
+</html>

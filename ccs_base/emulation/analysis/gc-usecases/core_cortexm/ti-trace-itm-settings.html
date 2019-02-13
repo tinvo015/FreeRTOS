@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="import" href="../components/polymer/polymer.html">
+    <script src="../components/webcomponentsjs/webcomponents-lite.min.js"></script>
+    <script type='text/javascript' src="../components/ti-core-assets/scripts/q.js"></script>
+    <link rel="import" href="../components/paper-dialog/paper-dialog.html">
+    <link rel="import" href="../components/iron-icons/iron-icons.html">
+    <link rel="import" href="../components/iron-icons/av-icons.html">
+    <link rel="import" href="../components-dbgtrc/ti-trace-config/ti-dbgtrc-config-dialog.html">
+    <link rel="import" href="ti-trace-itm-swmsg-config.html">
+    <link rel="import" href="ti-trace-itm-stat-func-config.html">
+    <link rel="import" href="ti-trace-itm-exception-profile-config.html">
+    <link rel="import" href="ti-trace-itm-var-trace-config.html">
+    <link rel="import" href="ti-trace-itm-common-config.html">
+    <link rel="import" href="ti-trace-swo-receiver.html">
+    <link rel="import" href="ti-trace-etb-receiver.html">
+</head>
+
+<body>
+    <dom-module id="ti-trace-itm-settings">
+        <style>
+        .settings {
+            margin: 5px;
+            padding-top: 5px;
+            padding-bottom: 5px;
+            padding-left: 10px;
+            padding-right: 10px;
+            font-size: 14px;
+            font-style: italic;
+            font-weight: bold;
+            color: #115566,
+        }
+        </style>
+        <template>
+            <ti-dbgtrc-config-dialog id="traceSettings" header-text="Configure Event Profile" on-opened-changed="_openedChanged">
+                <template is="dom-if" if="[[setupError]]">
+                    <div>
+                        <iron-icon icon="warning" style="color:red;"> </iron-icon>
+                        <span style="color:red;font-size:16px"> [[setupErrMsg]] </span>
+                    </div>
+                    <br />
+                </template>
+
+                <div class="settings">
+                    Step 1. Configure the events to profile:
+                </div>
+                <div>
+                    <ti-trace-itm-common-config ts-prescaler="{{commonTsPrescaler}}"></ti-trace-itm-common-config>
+                </div>
+                <br />
+                <div>
+                    <ti-trace-itm-stat-func-config id="statFuncId" ts-prescaler="[[commonTsPrescaler]]"></ti-trace-itm-stat-func-config>
+                    <ti-trace-itm-exception-profile-config id="excTraceId" ts-prescaler="[[commonTsPrescaler]]"></ti-trace-itm-exception-profile-config>
+                    <ti-trace-itm-var-trace-config id="varTraceId" config={{varTraceUsecaseProp}} enable-usecase={{varTraceUsecaseEnable}} ts-prescaler="[[commonTsPrescaler]]" ta="[[ta]]" active-out-file-name="[[activeOutFileName]]"></ti-trace-itm-var-trace-config>
+                    <ti-trace-itm-swmsg-config id="swMsgId" channel-color="{{channelColor}}" ts-prescaler="[[commonTsPrescaler]]"></ti-trace-itm-swmsg-config>
+                </div>
+                <br />
+                <div class="settings">
+                    Step 2. Optional advanced settings to change the trace export interface configuration from default settings:
+                </div>
+                <div>
+                    <!--ti-trace-swo-receiver config={{rcvrProp}}></ti-trace-swo-receiver-->
+                    <ti-trace-etb-receiver config={{rcvrProp}}></ti-trace-etb-receiver>
+                </div>
+            </ti-dbgtrc-config-dialog>
+        </template>
+        <script>
+            Polymer ({
+                is: "ti-trace-itm-settings",
+
+                properties : {
+                    commonTsPrescaler : {
+                        type: String,
+                        notify: true,
+                        reflectToAttribute: true,
+                    },
+                    varTraceUsecaseEnable: {
+                        notify: true,
+                        reflectToAttribute: true,
+                        type: Boolean,
+                    },
+                    varTraceUsecaseProp : {
+                        notify: true,
+                        reflectToAttribute: true,
+                        type: Array,
+                    },
+                    channelColor : {
+                        type: Array,
+                        reflectToAttribute: true,
+                        notify: true,
+                    },
+                    rcvrProp : {
+                        notify: true,
+                        reflectToAttribute: true,
+                        type: Array
+                    },
+                    ta : {
+                        notify: true,
+                        type: Object,
+                        reflectToAttribute: true
+                    },
+                    activeOutFileName: {
+                        notify: true,
+                        type: String,
+                        reflectToAttribute: true,
+                        value: undefined,
+                    },
+                    traceOp : {
+                        notify: true,
+                        type: Number,
+                    },
+                    aetOpList : {
+                        notify: true,
+                        type: Array,
+                        value: [],
+                    },
+                    activeCore: {
+                        notify: true,
+                        type: String,
+                    },
+                    deviceInfo : {
+                        notify: true,
+                        type: String,
+                    },
+                    setupError : {
+                        notify: true,
+                        type: Boolean,
+                        value: false,
+                        reflectToAttribute: true,
+                    },
+                    setupErrMsg : {
+                        notify: true,
+                        type: String,
+                        value: "",
+                    },
+                    traceRoutes : {
+                        notify: true,
+                        reflectToAttribute: true,
+                        type: Array,
+                    },
+                    rcvrName : {
+                        notify: true,
+                        reflectToAttribute: true,
+                        type: String,
+                        value: "ETB"
+                    },
+                    connectToCore : {
+                        notify: true,
+                        type: Object,
+                    }
+                },
+
+                traceCreated : false,
+
+                savedSettings : [],
+
+                firstOpen : true,
+
+                open : function() {
+                    this.$.traceSettings.toggle();
+                },
+
+                _openedChanged : function (evt) {
+                    // Till the settings is opened once don't perform
+                    // any checks.
+                    if (this.firstOpen)
+                    {
+                        var opened = evt.detail.value;
+                        if (opened)
+                        {
+                            this.firstOpen = false;
+                        }
+                        return;
+                    }
+
+                    if ((undefined !== this.deviceInfo) && (undefined !== this.activeCore))
+                    {
+                        if(false === evt.detail.value)
+                        {
+                            if ("confirmed" === this.$.traceSettings.closingReason)
+                            {
+                                var _self = this;
+                                //var traceCpu = this.deviceInfo.name + "/" + this.activeCore;
+                                this._savesettings();
+
+                                var e1 = this.$.statFuncId.hasError();
+                                var e2 = this.$.varTraceId.hasError();
+                                var e3 = this.$.excTraceId.hasError();
+                                var e4 = this.$.swMsgId.hasError();
+
+                                if (e1 || e2 || e3 || e4)
+                                {
+                                    // There is atleast one error
+                                    // Do not apply settings and keep dialog open
+                                    this.setupError = true;
+                                    this.setupErrMsg = "Please resolve errors";
+                                    this.open();
+                                }
+                                else {
+                                    this.setupError = false;
+                                    this.setupErrMsg = "";
+                                    /*
+                                    this.removesettings().then(function(){
+                                        return _self.applysettings(traceCpu);
+                                    }).catch(function(err){
+                                        _self.reportError(err);
+                                    }).finally(function(){
+                                        console.log("here");
+                                    });
+                                    */
+                                }
+                            }
+                            else {
+                                if (this.setupError)
+                                {
+                                    this.open();
+                                }
+                                else {
+                                    this._restoresettings();
+                                    // Undo any changed settings
+                                }
+
+                            }
+                        }
+                    }
+                    else {
+                        this.setupError = true;
+                        this.setupErrMsg = "Target is not connected";
+
+                        if(false === evt.detail.value)
+                        {
+                            this.open();
+                        }
+                    }
+                },
+
+                reportError : function(err) {
+                    this.setupError = true;
+                    this.setupErrMsg = err;
+                    this.open();
+                },
+
+                applysettings : function(traceCpu) {
+                    var _self = this;
+                    var sequence = [];
+
+                    var s1 = _self.ta.cloudTrace.isTargetConnected(traceCpu).then(function(ret){
+                        if (!ret.connected)
+                        {
+                            throw("Core is not connected");
+                        }
+                        else {
+                            return;
+                        }
+                    }).then(function (ret) {
+                        return _self.ta.cloudTrace.createOperation(traceCpu,"Trace");
+                    }).then(function (ret) {
+                        _self.traceOp = ret.handle;
+                        _self.traceStatus = "Configuring Trace Operation";
+                        //console.log("SWO Properties sent")
+                        //console.log(_self.rcvrProp);
+                        return _self.ta.cloudTrace.setProperties(ret.handle, _self.rcvrProp);
+                    }).then(function (ret) {
+                        return _self.ta.cloudTrace.getProperties(_self.traceOp);
+                    }).then (function (ret) {
+                        //console.log("SWO Properties received")
+                        //console.log(ret);
+                        _self.traceStatus = "Enabling Trace Operation";
+                        return _self.ta.cloudTrace.setEnableOperation(_self.traceOp, true);
+                    }).then(function (ret) {
+                        _self.traceStatus = "Creating Trace Decoder";
+                        return _self.ta.cloudTrace.createTrace(_self.traceOp);
+                    }).then(function (ret) {
+                        _self.traceCreated = true;
+                        return _self.ta.cloudTrace.readObjectFile(_self.traceOp, true, false);
+                    }).then(function(){
+                        return _self.configSwMsgUsecase(traceCpu);
+                    }).then (function() {
+                        return _self.configStatFuncUsecase(traceCpu);
+                    }).then (function() {
+                        return _self.configVarTraceUsecase(traceCpu);
+                    }).then (function() {
+                        return _self.configExcTraceUsecase(traceCpu);
+                    }).catch(function(err) {
+                        var errtype = typeof err;
+                        var errmsg;
+                        if ("string" == errtype)
+                        {
+                            errmsg = err;
+                        }
+                        else {
+                            //console.log(JSON.stringify(err));
+                            errmsg = "Operation failed. Try again.";
+                        }
+                        //console.log(errmsg);
+
+                        var s1 = Q.resolve();
+
+                        s1 = s1.then(function(){
+                            return _self.removesettings(traceCpu);
+                        }).finally(function(){
+                            // Done removing all settings
+                            _self.reportError(errmsg);
+                        });
+                    });
+
+                    sequence.push(s1);
+                    return Q.all(sequence);
+                },
+
+                configStatFuncUsecase : function(traceCpu) {
+                    var _self = this;
+                    var sequence = Q.resolve();
+                    var prop = _self.$.statFuncId.getConfig();
+                    var aetOp;
+
+                    if (null !== prop)
+                    {
+                        console.log("Configuring Func Profiling Usecase");
+                        // create operation
+                        sequence = sequence.then(function() {
+                            return _self.ta.cloudTrace.createOperation(traceCpu,"AET");
+                        }).then(function(ret) {
+                            aetOp = ret.handle;
+                            // save the operation
+                            _self.aetOpList.push(aetOp);
+                            // apply the properties
+                            return _self.ta.cloudTrace.setProperties(aetOp, prop);
+                        }).then(function(){
+                            return _self.ta.cloudTrace.getProperties(aetOp);
+                        }).then(function(ret) {
+                            //enable the operation
+                            return _self.ta.cloudTrace.setEnableOperation(aetOp, true);
+                        }).catch(function(err){
+                            throw("Failed to configure Func Profiling Usecase");
+                        });
+                    }
+                    return sequence;
+                },
+
+                configVarTraceUsecase : function(traceCpu) {
+                    var _self = this;
+                    var sequence = [Q.resolve()];
+                    var propArray = _self.$.varTraceId.getConfig();
+                    if (null !== propArray)
+                    {
+                        // We can have multiple variable watchpoint triggers
+                        // create a promsie sequence
+
+                        for(var varindex=0; varindex < propArray.length; varindex++)
+                        {
+                            var s1 = Q.resolve();
+                            console.log("Configuring Variable Trace Usecase");
+                            // when using for loops, use clojure to make the property
+                            // variable is bound to the async execution as javascript
+                            // has no block scope but has function scope
+                            (function(prop){
+                                var aetOp;
+                                s1 = s1.then(function() {
+                                    return _self.ta.cloudTrace.createOperation(traceCpu,"AET");
+                                }).then(function(ret) {
+                                    aetOp = ret.handle;
+                                    // save the operation
+                                    _self.aetOpList.push(aetOp);
+                                    // apply the properties
+                                    return _self.ta.cloudTrace.setProperties(aetOp, prop);
+                                }).then(function(){
+                                    return _self.ta.cloudTrace.getProperties(aetOp);
+                                }).then(function() {
+                                    //enable the operation
+                                    return _self.ta.cloudTrace.setEnableOperation(aetOp, true);
+                                }).catch(function(err){
+                                    console.log("Failed to configure Variable Trace Usecase");
+                                });
+                            })(propArray[varindex]);
+
+                            sequence.push(s1);
+                        }
+                    }
+                    return Q.all(sequence);
+                },
+
+                configExcTraceUsecase : function(traceCpu) {
+                    var _self = this;
+                    var sequence = Q.resolve();
+                    var aetOp;
+                    var prop = _self.$.excTraceId.getConfig();
+
+                    if (null !== prop)
+                    {
+                        console.log("Configuring Exception Trace Usecase");
+                        // create operation
+                        sequence = sequence.then(function() {
+                            return _self.ta.cloudTrace.createOperation(traceCpu,"AET");
+                        }).then(function(ret) {
+                            aetOp = ret.handle;
+                            // save the operation
+                            _self.aetOpList.push(aetOp);
+                            // apply the properties
+                            return _self.ta.cloudTrace.setProperties(aetOp, prop);
+                        }).then(function(){
+                            return _self.ta.cloudTrace.getProperties(aetOp);
+                        }).then(function(ret) {
+                            //enable the operation
+                            return _self.ta.cloudTrace.setEnableOperation(aetOp, true);
+                        }).catch(function(err){
+                            throw("Failed to configure Exception Trace Usecase");
+                        });
+                    }
+                    return sequence;
+                },
+
+                configSwMsgUsecase : function(traceCpu) {
+                    var _self = this;
+                    var sequence = Q.resolve();
+                    var aetOp;
+                    var prop = _self.$.swMsgId.getConfig();
+
+                    if (null !== prop)
+                    {
+                        console.log("Configuring SW Message Trace Usecase");
+                        // create operation
+                        sequence = sequence.then(function() {
+                            return _self.ta.cloudTrace.createOperation(traceCpu,"AET");
+                        }).then(function(ret) {
+                            aetOp = ret.handle;
+                            // save the operation
+                            _self.aetOpList.push(aetOp);
+                            // apply the properties
+                            return _self.ta.cloudTrace.setProperties(aetOp, prop);
+                        }).then(function(){
+                            return _self.ta.cloudTrace.getProperties(aetOp);
+                        }).then(function(ret) {
+                            //enable the operation
+                            return _self.ta.cloudTrace.setEnableOperation(aetOp, true);
+                        }).catch(function(err){
+                            throw("Failed to configure Exception Trace Usecase");
+                        });
+                    }
+                    return sequence;
+                },
+
+                removesettings : function (traceCpu) {
+                    var _self = this;
+                    var sequence;
+
+                    sequence = _self.removetrace().then(function(traceCpu) {
+                        return _self.removetriggers(traceCpu);
+                    });
+
+                    return sequence;
+                },
+
+                removetriggers : function (traceCpu) {
+                    var _self = this;
+                    var sequence = [Q.resolve()];
+
+                    if (_self.aetOpList.length > 0)
+                    {
+                        var aethandle = _self.aetOpList.slice();
+                        _self.aetOpList = [];
+
+                        for(var index=0; index < aethandle.length; index++)
+                        {
+                            var s1 = Q.resolve();
+                            // Javascript has no block scope
+                            // To ensure that the operation handle is correct
+                            // inside the async call, use functions (clojure)
+                            (function(aetOp){
+                                s1 = s1.then(function() {
+                                    return _self.ta.cloudTrace.setEnableOperation(aetOp, false);
+                                }).then(function(){
+                                    return _self.ta.cloudTrace.releaseOperation(aetOp);
+                                }).catch(function(err){
+                                    console.log(err);
+                                });
+                            })(aethandle[index]);
+
+                            sequence.push(s1);
+                        }
+                    }
+
+                    return Q.all(sequence);
+                },
+
+                removetrace : function (traceCpu) {
+                    var _self = this;
+                    var sequence = [Q.resolve()];
+
+                    if (_self.traceOp !== undefined)
+                    {
+                        var tracehandle = _self.traceOp;
+                        _self.traceOp = undefined;
+                        var s2 = Q.resolve(tracehandle);
+
+                        if (this.traceCreated) {
+                            s2 = s2.then(function(tracehandle) {
+                                return _self.ta.cloudTrace.setEnableOperation(tracehandle, false);
+                            }).then(function(){
+                                _self.traceCreated = false;
+                                // destroy trace also releases the handle
+                                return _self.ta.cloudTrace.destroyTrace(tracehandle);
+                            }).catch(function(err){
+                                console.log(err);
+                            });
+                        } else {
+                            s2 = s2.then( function(tracehandle) {
+                                return _self.ta.cloudTrace.setEnableOperation(tracehandle, false);
+                            }).then(function(){
+                                _self.traceCreated = false;
+                                //console.log("Trace release " + tracehandle);
+                                return _self.ta.cloudTrace.releaseOperation(tracehandle);
+                            });
+                        }
+                        sequence.push(s2);
+                    }
+
+                    return Q.all(sequence);
+                },
+
+                attached: function() {
+                    //this.open();
+                },
+
+                _savesettings: function() {
+                    // clear any old settings
+                    this.savedSettings = [];
+                    // push new settings
+                    this.savedSettings.push(this.commonTsPrescaler);
+                    this.savedSettings.push(this.rcvrProp);
+
+                    this.$.statFuncId._savesettings();
+                    this.$.excTraceId._savesettings();
+                    this.$.varTraceId._savesettings();
+                    this.$.swMsgId._savesettings();
+                },
+
+                _restoresettings: function() {
+                    if (this.savedSettings.length === 2)
+                    {
+                        this.commonTsPrescaler = this.savedSettings[0];
+                        this.rcvrProp = this.savedSettings[1];
+                    }
+
+                    this.$.statFuncId._revertsettings();
+                    this.$.excTraceId._revertsettings();
+                    this.$.varTraceId._revertsettings();
+                    this.$.swMsgId._revertsettings();
+                },
+
+                onetimesetup : function() {
+                    var tbr = undefined;
+                    var _self = this;
+                    var traceRoute = this.traceRoutes.find(r => r.receiver == this.rcvrName);
+                    var promise = Q.resolve();
+
+                    promise = promise.then(function(){
+                        if (traceRoute.hasOwnProperty('sink')) {
+                            tbr = traceRoute.sink;
+                            return _self.ta.cloudTrace.isTargetConnected(tbr)
+                        }
+                        else {
+                            throw("Could not find trace route");
+                        }
+                    }).then(function (ret) {
+                        if (!ret.connected)
+                        {
+                            return _self.connectToCore(tbr);
+                        }
+                        else {
+                            return;
+                        }
+                    });
+
+                    return promise;
+                },
+
+            });
+        </script>
+    </dom-module>
+
+
+</body>
+
+</html>

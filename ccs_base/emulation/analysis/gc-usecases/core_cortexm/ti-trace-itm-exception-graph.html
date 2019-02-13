@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="import" href="../components/polymer/polymer.html"/>
+    <script src="../components/webcomponentsjs/webcomponents-lite.js"/></script>
+    <script type='text/javascript' src="../components/ti-core-assets/scripts/q.js"></script>
+    <!--link rel="import" href="../components/vaadin-grid/vaadin-grid.html"/-->
+    <!--link rel="import" href="../components/vaadin-grid/vaadin-grid-sorter.html"/-->
+    <!--link rel="import" href="../components/paper-styles/color.html"/-->
+    <!--link rel="import" href="../components/iron-icons/iron-icons.html"/-->
+    <link rel="import" href="../components/ti-core-stylesheets/ti-core-stylesheets.html">
+    <link rel="import" href="../components/ti-widget-common/ti-widget-checkbox.html"/>
+    <link rel="import" href="../components/ti-widget-common-behaviors/ti-widget-common-behaviors.html"/>
+    <!--link rel="import" href="../components/ti-widget-plot/ti-widget-plot.html"/-->
+    <!--link rel="import" href="../components/ti-widget-common/ti-widget-container.html"-->
+    <link rel="import" href="../components-dbgtrc/ti-trace-graphs/ti-trace-graph.html">
+</head>
+
+<body class="ti-theme" unresolved>
+    <dom-module name="ti-trace-itm-exception-graph">
+        <template>
+            <style>
+
+            </style>
+
+            <ti-trace-graph id="excgraph" y-axis-label-formatter=[[yAxisLabelFormatter]] y-value-formatter=[[yValueFormatter]] data=[[data]] labels=[[labels]] title=[[title]] xlabel=[[xlabel]] ylabel=[[ylabel]] draw-points="[[drawPoints]]" stroke-width=[[strokeWidth]] point-size=[[pointSize]]  draw-point-style=[[drawPointStyle]] colors=[[colors]] block-draw=[[blockDraw]]> </ti-trace-graph>
+
+        </template>
+        <script>
+            Polymer ({
+                is: "ti-trace-itm-exception-graph",
+
+                properties: {
+                    data: {
+                        type: Array,
+                        reflectToAttribute: true,
+                    },
+
+                    labels: {
+                        type: Array,
+                        value: [],
+                        reflectToAttribute: true,
+                    },
+
+                    title: {
+                        type: String,
+                        value: "",
+                        reflectToAttribute: true,
+                    },
+
+                    ylabel: {
+                        type: String,
+                        value: "Exception",
+                        reflectToAttribute: true,
+                    },
+
+                    xlabel: {
+                        type: String,
+                        value: "Time",
+                        reflectToAttribute: true,
+                    },
+
+                    drawPoints: {
+                        type: Boolean,
+                        value: false,
+                        reflectToAttribute: true,
+                    },
+
+                    strokeWidth: {
+                        type: Number,
+                        value: 20,
+                        reflectToAttribute: true,
+                    },
+
+                    pointSize: {
+                        type: Number,
+                        value: 1,
+                        reflectToAttribute: true,
+                    },
+
+                    yAxisLabelFormatter: {
+                        type: Object,
+                        value: undefined,
+                        reflectToAttribute: true,
+                    },
+
+                    yValueFormatter: {
+                        type: Object,
+                        value: undefined,
+                        reflectToAttribute: true,
+                    },
+
+                    drawPointStyle: {
+                        type: String,
+                        value: "Square",
+                        notify: true,
+                        reflectToAttribute: true,
+                    },
+
+                    colors: {
+                        type: Array,
+                        value: ["green", "red", "green", "red"],
+                        notify: true,
+                        reflectToAttribute: true,
+                    },
+
+                    blockDraw: {
+                        type: Boolean,
+                        notify: true,
+                        reflectToAttribute: true,
+                    },
+                },
+
+                _yAxisLabelFormatter: function(y) {
+                    return "Exc" + y;
+                },
+
+                _yValueFormatter: function(y) {
+                    return "";
+                },
+
+                resize: function() {
+                    this.$.excgraph._resize();
+                },
+
+                ready: function()
+                {
+                    this.yAxisLabelFormatter = this._yAxisLabelFormatter.bind(this);
+                    this.yValueFormatter = this._yValueFormatter.bind(this);
+
+                    //this.labels = ['Time','Exc1 Active', 'Exc1 Preempt', 'Exc2 Active', 'Exc2 Preempt'];
+
+                    /*
+                    this.data = [
+                                    [0, NaN, NaN, NaN],
+                                    [1, 1, NaN, NaN],
+                                    [2, 1, NaN, NaN],
+                                    [2, NaN, NaN, NaN],
+                                    [3, 1, NaN, NaN],
+                                    [4, 1, NaN, NaN],
+                                    [4, NaN, NaN, NaN],
+                                    [5, 1, NaN, NaN],
+                                    [6, 1, NaN, NaN],
+                                    [6, NaN, 2, 3],
+                                    [7, NaN, 2, 3],
+                                    [7, 1, NaN, NaN],
+                                    [8, 1, NaN, NaN],
+                                    [9, 1, NaN, NaN],
+                            ];*/
+
+                            // Entry 1
+                            // Exit 1
+                            // Return 0
+                            // Entry 1
+                            // Entry 2
+                            // Exit 2
+                            // Return 1
+                            // Exit 1
+                            // Return 0
+                            /*
+                            this.data = [
+                                            [0, NaN, NaN, NaN, NaN],
+                                            [1, 1, NaN, NaN, NaN],
+                                            [2, 1, NaN, NaN, NaN],
+                                            [2, NaN, NaN, NaN, NaN],
+                                            [4, 1, NaN, NaN, NaN],
+                                            [5, 1, 1, 2, NaN],
+                                            [6, 1, 1, 2, NaN],
+                                            [6, 1, NaN, NaN, NaN],
+                                            [7, 1, NaN, NaN, NaN],
+                                            [8, NaN, NaN, NaN, NaN],
+
+
+
+
+                                    ];
+                                    */
+                    /*
+                    this.data = [
+                                    [0, NaN, NaN, NaN, NaN],
+                                    [1, 1, NaN, NaN, NaN],
+                                    [2, 1, NaN, NaN, NaN],
+                                    [2, NaN, NaN, NaN, NaN],
+                                    [3, NaN, NaN, NaN, NaN],
+                                    [4, 1, NaN, NaN, NaN],
+                                    [5, 1, 1, 2, NaN],
+                                    [6, 1, 1, 2, NaN],
+                                    [7, 1, NaN, NaN, NaN],
+                                    [8, 1, NaN, NaN, NaN],
+                                    [8, NaN, NaN, NaN, NaN],
+                                    [9, 1, NaN, NaN, NaN],
+                                    [10, 1, NaN, NaN, NaN],
+                                    [11, NaN, NaN, NaN, NaN],
+
+                            ];*/
+                            /*
+
+                this.data = [
+                                [0, NaN, NaN, NaN, NaN],
+                                [1, 1, NaN, NaN, NaN],
+                                [1, NaN, NaN, NaN, NaN],
+                                [2, NaN, NaN, 2, NaN],
+                                [2, NaN, NaN, NaN, NaN],
+                                [3, NaN, NaN, 2, NaN],
+                                [3, NaN, NaN, NaN, NaN],
+                                [4, 1, NaN, NaN, NaN],
+                                [5, NaN, NaN, NaN, NaN],
+
+                        ];*/
+                }
+            });
+        </script>
+    </dom-module>
+
+</body>
+</html>

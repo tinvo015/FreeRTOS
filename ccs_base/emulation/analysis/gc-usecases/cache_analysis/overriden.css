@@ -1,0 +1,31 @@
+paper-listbox {
+    border-right: 1px solid #aaaaaa;
+}
+
+paper-toolbar {
+    border-bottom: 1px solid #aaaaaa;
+}
+
+paper-listbox, ti-widget-listbox paper-item {
+    background-color: #eeeeee !important;
+    color: #231F20 !important;
+}
+
+table {
+    border-spacing: 0;
+}
+
+th {
+    border-bottom: 1px solid #eeeeee;
+}
+
+th, td {
+    padding: 5px;
+    width:50%;
+}
+
+table {
+    width: 100%;
+    padding: 20px;
+}
+

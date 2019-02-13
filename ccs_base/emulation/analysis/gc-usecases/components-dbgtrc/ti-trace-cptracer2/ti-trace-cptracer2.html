@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<!--
+    Copyright (c) 2018, Texas Instruments Incorporated
+    All rights reserved.
+
+    Redistribution and use in source and binary forms, with or without
+    modification, are permitted provided that the following conditions
+    are met:
+
+    *   Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+    *   Neither the name of Texas Instruments Incorporated nor the names of
+    its contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+    AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+    THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+    PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+    CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+    EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+    PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+    OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+    WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+    OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+    EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-->
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<script src="../../components/webcomponentsjs/webcomponents-lite.min.js"></script>
+
+<link rel="import" href="../../components/polymer/polymer.html">
+<link rel="import" href="../../components/ti-core-stylesheets/ti-core-stylesheets.html">
+<link rel="import" href="../../components/ti-widget-common/ti-widget-label.html">
+<link rel="import" href="../../components/ti-widget-common/ti-widget-tab.html">
+<link rel="import" href="../../components/ti-widget-common/ti-widget-tabcontainer.html">
+<link rel="import" href="../../components/ti-widget-icon-button/ti-widget-icon-button.html">
+<link rel="import" href="../ti-trace-common/ti-trace-common-style.html">
+<link rel="import" href="../ti-trace-common/ti-trace-menubar.html">
+<link rel="import" href="../ti-trace-common/ti-trace-progress.html">
+<link rel="import" href="../ti-trace-cptracer2/ti-trace-cptracer2-common-config.html">
+<link rel="import" href="../ti-trace-cptracer2/ti-trace-cptracer2-graph.html">
+<link rel="import" href="../ti-trace-cptracer2/ti-trace-cptracer2-latency-table.html">
+<link rel="import" href="../ti-trace-cptracer2/ti-trace-cptracer2-raw-table.html">
+<link rel="import" href="../ti-trace-cptracer2/ti-trace-cptracer2-settings.html">
+<link rel="import" href="../ti-trace-cptracer2/ti-trace-cptracer2-throughput-table.html">
+<link rel="import" href="../ti-trace-cptracer2/ti-trace-cptracer2-trans-table.html">
+<link rel="import" href="../ti-trace-model/ti-trace-model.html">
+
+</head>
+<body class="ti-theme" unresolved>
+    <dom-module id='ti-trace-cptracer2'>
+        <template>
+            <style include="ti-trace-common-style"> </style>
+            <style>
+                html {
+                    margin: 0px;
+                    padding: 0px;
+                }
+                body {
+                    padding: 0;
+                    margin: 0;
+                    border: 0;
+                }
+                #menuBar {
+                    display: flex;
+                    width: 100%;
+                    height: 40px;
+                }
+                #traceDataContainer {
+                    position:absolute;
+                    width: 100%;
+                    height: 100%;
+                }
+                button {
+                  display: block;
+                  line-height: 40px;
+                  background-color: transparent;
+                  border: none;
+                  font-size: 14px;
+                  margin: 20px;
+                }
+            </style>
+            <custom-style>
+                <style is="custom-style">
+                    paper-tabs[no-bar] paper-tab.iron-selected {
+                        color: #ff0000;
+                    }
+                </style>
+            </custom-style>
+
+            <ti-trace-model id="tm" device-id="{{devId}}" trace-agent="{{ta}}" active-core="{{activeCore}}" device-info="{{deviceInfo}}"></ti-trace-model>
+            <ti-trace-progress id="progress" status="[[traceStatus]]"></ti-trace-progress>
+            <ti-trace-cptracer2-settings id="settings" domain-labels=[[domainLabels]] selected-domain-changed=[[selectedDomainChanged]] probe-labels=[[probeLabels]] probe-enable-check-changed=[[probeEnableCheckChanged]] probe-config="[[probeConfig]]" aet-properties="{{aetProperties}}" current-probe="[[currentProbe]]"></ti-trace-cptracer2-settings>
+            <ti-trace-menubar id="menuBar" open-settings=[[toggleSettings]] status-msg=[[traceStatus]] num-records=[[numRecordsRead]] num-gaps=[[numGaps]] start-callback="{{startTrace}}" stop-callback="{{stopTrace}}"></ti-trace-menubar>
+
+            <ti-widget-tabcontainer id="traceDataContainer" selected-index="0" layout on-selected_tab_changed="tabClickCallback">
+                <ti-widget-tab id="cpt2GraphView" name="[[graphDataTabName]]" icon="timeline" tooltip="Trace graph view" active>
+                    <ti-trace-cptracer2-graph id='cptracer2Graph' trace-data=[[traceData]]></ti-trace-cptracer2-graph>
+                </ti-widget-tab>
+                <ti-widget-tab id="cpt2ThroughputDataView" name="[[throughputDataTabName]] ([[traceDataThroughput.length]])" icon="view-column"  tooltip="Throughput Data">
+                    <ti-trace-cptracer2-throughput-table id='throughputTable' data="[[traceDataThroughput]]"></ti-trace-cptracer2-throughput-table>
+                </ti-widget-tab>
+                <ti-widget-tab id="cpt2LatencyDataView" name="[[latencyDataTabName]] ([[traceDataLatency.length]])" icon="view-column"  tooltip="Latency Data">
+                    <ti-trace-cptracer2-latency-table id='latencyTable' data="[[traceDataLatency]]"></ti-trace-cptracer2-latency-table>
+                </ti-widget-tab>
+                <ti-widget-tab id="cpt2TransactionLogView" name="[[transactionLogTabName]] ([[traceDataTransactions.length]])" icon="view-column"  tooltip="Transaction Log">
+                    <ti-trace-cptracer2-trans-table id='transactionTable' data="[[traceDataTransactions]]"></ti-trace-cptracer2-trans-table>
+                </ti-widget-tab>
+                <ti-widget-tab id="cpt2DataView" name="[[rawDataTabName]] ([[traceData.length]])" icon="view-column"  tooltip="Trace data view">
+                    <ti-trace-cptracer2-raw-table id='rawTable' data="[[traceData]]"></ti-trace-cptracer2-raw-table>
+                </ti-widget-tab>
+            </ti-widget-tabcontainer>
+
+        </template>
+        <script>
+            Polymer({
+                is: 'ti-trace-cptracer2',
+                properties: {
+                    activeCore: {
+                        notify: true,
+                        type: String,
+                        reflectToAttribute: true,
+                        value: undefined
+                    },
+                    systemStm: {
+                        type: String,
+                        value: undefined
+                    },
+                    deviceInfo: {
+                        notify: true,
+                        type: String,
+                        reflectToAttribute: true,
+                        value: undefined,
+                        observer: "_deviceInfoChanged"
+                    },
+                    traceOp: {
+                        notify: true,
+                        type: Number,
+                        reflectToAttribute: true,
+                        value: undefined
+                    },
+                    aetOp: {
+                        notify: true,
+                        type: Number,
+                        reflectToAttribute: true,
+                        value: undefined
+                    },
+                    ta: {
+                        notify: true,
+                        type: Object,
+                        reflectToAttribute: true
+                    },
+                    coresConnected: {
+                        type: Boolean,
+                        value: false
+                    },
+                    devId: {
+                        notify: true,
+                        type: Number,
+                        reflectToAttribute: true
+                    },
+                    traceProperties: {
+                        type: Array,
+                        value: undefined,
+                        notify: true,
+                        reflectToAttribute: true
+                    },
+                    aetProperties: {
+                        type: Array,
+                        value: undefined,
+                        notify: true,
+                        reflectToAttribute: true,
+                        observer: '_aetPropertiesChanged',
+                    },
+                    traceStatus: {
+                        notify: true,
+                        reflectToAttribute: true,
+                        type: String,
+                        value: ""
+                    },
+                    numRecordsRead: {
+                        notify: true,
+                        reflectToAttribute: true,
+                        type: String,
+                        value: "0"
+                    },
+                    numGaps: {
+                        notify: true,
+                        reflectToAttribute: true,
+                        type: String,
+                        value: "0"
+                    },
+                    transactionRecordsRead: {
+                        noftify: true,
+                        type: Number,
+                        value: 0
+                    },
+                    numGaps: {
+                        notify: true,
+                        reflectToAttribute: true,
+                        type: String,
+                        value: "0"
+                    },
+                    traceData: {
+                        notify: true,
+                        reflectToAttribute: true,
+                        type: Array,
+                        value: [],
+                        observer: '_traceDataChanged'
+                    },
+                    traceDataThroughput: {
+                        notify: true,
+                        reflectToAttribute: true,
+                        type: Array,
+                        value: []
+                    },
+                    traceDataLatency: {
+                        notify: true,
+                        reflectToAttribute: true,
+                        type: Array,
+                        value: []
+                    },
+                    traceDataTransactions: {
+                        notify: true,
+                        reflectToAttribute: true,
+                        type: Array,
+                        value: []
+                    },
+                    traceDataGraph: {
+                        notify: true,
+                        reflectToAttribute: true,
+                        type: Array,
+                        value: []
+                    },
+                    rawDataTabName: {
+                        notify: true,
+                        reflectToAttribute: true,
+                        type: String,
+                        value: "Raw Data",
+                    },
+                    throughputDataTabName: {
+                        notify: true,
+                        reflectToAttribute: true,
+                        type: String,
+                        value: "Throughput Data",
+                    },
+                    latencyDataTabName: {
+                        notify: true,
+                        reflectToAttribute: true,
+                        type: String,
+                        value: "Latency Data",
+                    },
+                    graphDataTabName: {
+                        notify: true,
+                        reflectToAttribute: true,
+                        type: String,
+                        value: "Graph View",
+                    },
+                    transactionLogTabName: {
+                        notify: true,
+                        reflectToAttribute: true,
+                        type: String,
+                        value: "Transaction Log"
+                    },
+                    captureEnabled: {
+                        type: Boolean,
+                        value: false,
+                    },
+                    domainLabels: {
+                        type: String
+                    },
+                    probeLabels: {
+                        type: Array,
+                        value: [],
+                        notify: true
+                    },
+                    currentProbe: {
+                        type: String,
+                        notify: true
+                    }
+                },
+
+                _deviceInfoChanged: function(info) {
+
+                    var _self = this;
+                    var stmCore = [];
+                    var systemStm;
+
+                    for (let cluster of _self.deviceInfo.children) {
+                        for (let node of cluster.children) {
+                            if (node.local_name == "SystemStm") {
+                                var nodeObj = {
+                                    name: node.name,
+                                    local_name: node.local_name,
+                                    type: node.type
+                                }
+                                stmCore.push(nodeObj);
+                            
+                                systemStm = node.name;
+                            }
+                        }
+                    }
+
+                    if (systemStm != _self.systemStm) {
+                        _self.systemStm = systemStm;
+                    }
+                    else {
+                        return;
+                    }
+                    
+                    _self.$.progress.open();
+
+                    _self._connectToCores(stmCore).then(function() {
+                        _self.coresConnected = true;
+                    }).then(function() {
+                        _self._initializeOperations();
+                    }).then(function() {
+                        _self.$.progress.close();
+                    }).catch(function (err){
+                        console.log("Failed to connect to STM (needed for traffic profiling) or trace buffers." + JSON.stringify(err));
+                    }).finally(function() {
+                        
+                    });
+
+                },
+
+                _connectToCores: function (cores)
+                {
+                    if (cores.length === 0) {
+                        var p = Q.defer();
+                        p.resolve(null);
+                        return p.promise;
+                    } else {
+                        var core = cores.shift();
+                        var _self = this;
+                        return this.$.tm.connectToCore(core.name).then (function () {
+                            return _self._connectToCores(cores);
+                        }).catch(function (e) {
+                            console.log("Failed to connect to core: "+JSON.stringify(e));
+                        });
+                    }
+                },
+
+                startTrace: undefined,
+
+                _startTrace: function()
+                {
+                    var _self = this;
+                    var traceCreated = false;
+
+                    console.log("configuring");
+                
+                    this.traceData = [];
+                    this.$.progress.open();
+                    this.ta.cloudTrace.addListener("targetEvent", this.evtCallback);
+                
+                    this.ta.cloudTrace.isTargetConnected(_self.systemStm).then(function(ret) {
+                        if (!ret.connected)
+                        {
+                            return _self.ta.cloudTrace.connectTarget(_self.systemStm).then(function(){
+                                return _self.ta.cloudTrace.enableTargetEvents(_self.systemStm);
+                            });
+                        }
+                        return _self.ta.cloudTrace.enableTargetEvents(_self.systemStm);
+                    }).then(function () {
+                        return _self.ta.cloudTrace.setPreRunTimeout(60000);
+                    }).then(function() {
+                        return _self.ta.cloudTrace.enableTargetPreRunEvent(_self.systemStm);
+                    }).then(function () {
+                        var traceRoutes = _self.deviceInfo.trace_routes;
+                        var tbrs = [];
+                        for (var i=0; i<traceRoutes.length; i++) {
+                            if ((traceRoutes[i].source == _self.systemStm) && (traceRoutes[i].receiver == "ETB")) {
+                                for (let cluster of _self.deviceInfo.children) {
+                                    for (let node of cluster.children) {
+                                        if (node.name == traceRoutes[i].sink) {
+                                            var nodeObj = {
+                                                name: node.name,
+                                                local_name: node.local_name,
+                                                type: node.type
+                                            }
+                                            tbrs.push(nodeObj);
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        return _self._connectToCores(tbrs);
+                    }).then(function () {
+                        return _self.ta.cloudTrace.createOperation(_self.systemStm,"Trace");
+                    }).then(function (ret) {
+                        _self.traceOp = ret.handle;
+                        _self.traceStatus = "Configuring Trace Operation";
+                        return _self.ta.cloudTrace.setProperties(_self.traceOp, _self.traceProperties);
+                    }).then(function () {
+                        _self.traceStatus = "Configuring AET Operation";
+                        return _self.ta.cloudTrace.setProperties(_self.aetOp, _self.aetProperties);
+                    }).then(function (ret) {
+                        return _self.ta.cloudTrace.getProperties(_self.traceOp);
+                    }).then(function (ret) {
+                        _self.traceStatus = "Enabling Trace Operation";
+                        return _self.ta.cloudTrace.setEnableOperation(_self.traceOp, true);
+                    }).then(function (ret) {
+                        _self.traceStatus = "Enabling AET Operation";
+                        return _self.ta.cloudTrace.setEnableOperation(_self.aetOp, true);
+                    }).then(function (ret) {
+                        _self.traceStatus = "Creating Trace Decoder";
+                        return _self.ta.cloudTrace.createTrace(_self.traceOp);
+                    }).then(function (ret) {
+                        traceCreated = true;
+                        _self.traceStatus = "Enabling trace capture...";
+                        return _self.ta.cloudTrace.startTraceCapture(_self.traceOp);
+                    }).then(function () {
+                        return _self.ta.cloudTrace.disableTargetPreRunEvent(_self.systemStm);
+                    }).then(function () {
+                        _self.traceStatus = "Trace capture enabled";
+                        return _self.ta.cloudTrace.preRunComplete();
+                    }).then(function () {
+                        _self.captureEnabled = true;
+                    }).catch(function (err){
+                        console.log("Operation failed" + JSON.stringify(err));
+                        var handle = _self.traceOp;
+                        _self.traceOp = undefined;
+                        _self.traceStatus = "Trace Generation Error - Operation Cancelled";
+                        if (traceCreated) {
+                            _self.ta.cloudTrace.destroyTrace(handle).then(function (val) {
+                                _self.ta.cloudTrace.releaseOperation(handle);
+                            });
+                        } else if (handle !== undefined) {
+                            _self.ta.cloudTrace.releaseOperation(handle);
+                        }
+                    }).finally(function() {
+                        _self.$.progress.close();
+                    });
+                },
+
+                evtCallback: undefined,
+
+                _evtCallback: function(info)
+                {
+                    console.log("Event received: " + JSON.stringify(info));
+                    if (info.eventName === "Halt")
+                    {
+                        console.log("Target PreRun");
+                    } else if (info.eventName == "PreRun")
+                    {
+                        console.log("Target PreRun");
+                    }
+                },
+                
+                stopTrace: undefined,
+
+                _stopTrace: function ()
+                {
+                    var _self = this;
+                    if (this.captureEnabled) {
+                        
+                        this.captureEnabled = false;
+                        
+                        _self.ta.cloudTrace.stopTraceCapture(_self.traceOp).then(function() {
+                            _self.$.progress.open();
+                            _self.traceStatus = "Reading Trace Data...";
+                            return _self.ta.cloudTrace.readTraceDataByType(_self.traceOp, "CPT2");
+                        }).then(function (ret) {
+                            _self.$.progress.close();
+                            _self.traceStatus = "Read complete";
+                            _self.numRecordsRead = ret.numRead;
+                            _self.traceData = ret.table.data;
+                        }).catch(function (err) {
+                            _self.traceStatus = "Error Reading Trace Data";
+                            console.log("Failure: "+JSON.stringify(err));
+                        }).finally(function (val) {      
+                            // _self.ta.cloudTrace.destroyTrace(_self.traceOp);
+                            // _self.traceOp = undefined;
+                            // _self.ta.cloudTrace.destroyTrace(_self.aetOp);
+                            // _self.aetOp = undefined;
+                        });
+                    }
+                },
+
+                _traceDataChanged: function (data) {
+                    var _self = this;
+                    var throughput = [];
+                    var latency = [];
+                    var transaction = [];
+                    
+                    var gaps = 0;
+                    
+                    if (!(data instanceof Array)) {
+                        return;
+                    }
+                    
+                    for (var i = 0; i < data.length; i++) {
+
+                        if (typeof(data[i].datamsg) !== 'undefined') {
+                            if (data[i].datamsg.toLowerCase().indexOf("throughput") !== -1) {
+                                throughput.push(data[i]);
+                            }
+                            else if (data[i].datamsg.toLowerCase().indexOf("latency") !== -1) {
+                                latency.push(data[i]);
+                            }
+                            else if (data[i].datamsg.toLowerCase().indexOf("transaction") !== -1) {
+                                transaction.push(data[i]);
+                            }
+                        }
+
+                        if (typeof(data[i].tracestatus) !== 'undefined') {
+                            if ((data[i].tracestatus.toLowerCase().indexOf("fifo") !== -1) ||
+                                (data[i].tracestatus.toLowerCase().indexOf("bad") !== -1) ||
+                                (data[i].tracestatus.toLowerCase().indexOf("bad") !== -1)) {
+                                gaps++;
+                            }
+                        }                      
+
+                    }
+
+                    _self.traceDataThroughput = throughput;
+                    _self.traceDataLatency = latency;
+                    _self.traceDataTransactions = transaction;
+                    _self.numGaps = gaps;
+                },
+
+                _initializeOperations: function()
+                {
+                    var _self = this;
+                    var traceOpCreated = false;
+                    var aetOpCreated = false;
+                    var aetProperties = _self.aetProperties;
+
+                    if (_self.systemStm == undefined) {
+                        return;
+                    }
+
+                    if (_self.coresConnected == false) {
+                        return;
+                    }
+
+                    console.log("Capturing property trees.");
+
+                    this.$.progress.open();
+                    this.ta.cloudTrace.addListener("targetEvent", this.evtCallback);
+
+                    this.ta.cloudTrace.isTargetConnected(_self.systemStm).then(function(ret) {
+                        if (!ret.connected)
+                        {
+                            return _self.ta.cloudTrace.connectTarget(_self.systemStm).then(function(){
+                                return _self.ta.cloudTrace.createOperation(_self.systemStm,"Trace");
+                            });
+                        }
+                        return _self.ta.cloudTrace.createOperation(_self.systemStm,"Trace");
+                    }).then(function (ret) {
+                        _self.traceOp = ret.handle;
+                        return _self.ta.cloudTrace.getProperties(_self.traceOp);
+                    }).then(function (ret) {
+                        _self.traceProperties = ret.cfg;
+                        return _self.ta.cloudTrace.createOperation(_self.systemStm,"AET");
+                    }).then(function (ret) {
+                        _self.aetOp = ret.handle;
+                        return _self.ta.cloudTrace.getProperties(_self.aetOp)
+                    }).then(function (ret) {
+                        aetProperties = ret.cfg;
+                        //Set System Trace Type to CP Tracer 2 so that the first set of
+                        // available probes will be pulled into the property tree.
+                        aetProperties[0].sub_properties[0].value = "CP Tracer 2";
+                        return _self.ta.cloudTrace.setProperties(_self.aetOp, aetProperties)
+                    }).then(function (ret) {
+                        return _self.ta.cloudTrace.getProperties(_self.aetOp);
+                    }).then(function (ret) {
+                        aetProperties = ret.cfg;
+                        return _self.ta.cloudTrace.setProperties(_self.aetOp, aetProperties)
+                    }).then(function (ret) {
+                        return _self.ta.cloudTrace.getProperties(_self.aetOp)
+                    }).then(function (ret) {
+                        // Now set the shared aetProperties to trigger the notify.
+                        _self.aetProperties = ret.cfg;
+                    }).catch(function (err){
+                        console.log("Operation failed" + JSON.stringify(err));
+                        var handle = _self.traceOp;
+                        _self.traceOp = undefined;
+                        _self.traceStatus = "Trace Generation Error - Operation Cancelled";
+                        if (traceCreated) {
+                            _self.ta.cloudTrace.destroyTrace(handle).then(function (val) {
+                                _self.ta.cloudTrace.releaseOperation(handle);
+                            });
+                        } else if (handle !== undefined) {
+                            _self.ta.cloudTrace.releaseOperation(handle);
+                        }
+                    }).finally(function() {
+                        _self.$.progress.close();
+                    });
+                },
+
+                _aetPropertiesChanged: function(newVal) {
+                    var _self = this;
+                    var ucMapElement = {};
+                    var ucMapArr = [];
+
+                    _self.domainLabels = _self.aetProperties[0].sub_properties[0].sub_properties[0].allowed_values;
+
+                    _self.probeLabels = _self.aetProperties[0].sub_properties[0].sub_properties[0].sub_properties[0].sub_properties;
+
+                },
+
+                selectedDomainChanged: undefined,
+
+                _selectedDomainChanged: function(newVal) {
+                    var _self = this;
+
+                    if (_self.aetProperties instanceof Array) {
+                        _self.aetProperties[0].sub_properties[0].sub_properties[0].value = newVal;
+
+                        _self.ta.cloudTrace.setProperties(_self.aetOp, _self.aetProperties).then(function(ret) {
+                            return _self.ta.cloudTrace.getProperties(_self.aetOp);
+                        }).then(function(ret) {
+                            _self.aetProperties = ret.cfg;
+                        }).catch(function (err){
+                            console.log("Operation failed" + JSON.stringify(err));
+                        }).finally(function() {
+                            //TODO
+                        });
+                    }
+                },
+
+                probeEnableCheckChanged: undefined,
+
+                _probeEnableCheckChanged: function(event) {
+
+                    var _self = this;
+                    var currentProps = _self.aetProperties;
+
+                    // Update the property tree
+                    if (currentProps instanceof Array) {
+
+                        var probeCount = currentProps[0].sub_properties[0].sub_properties[0].sub_properties[0].sub_properties.length;
+                        for (var i = 0; i < probeCount; i++) {
+                            var probe = currentProps[0].sub_properties[0].sub_properties[0].sub_properties[0].sub_properties[i];
+                            if (probe.name == event.srcElement.id) {
+                                
+                                // Set enabled value
+                                currentProps[0].sub_properties[0].sub_properties[0].sub_properties[0].sub_properties[i].value = event.detail.value;
+                                _self.ta.cloudTrace.setProperties(_self.aetOp, currentProps).then(function(ret) {
+                                    return _self.ta.cloudTrace.getProperties(_self.aetOp);
+                                }).then(function(ret) {
+                                    // Set usecase
+                                    currentProps = ret.cfg;
+                                    if (event.detail.value) {
+                                        currentProps[0].sub_properties[0].sub_properties[0].sub_properties[0].sub_properties[i].sub_properties[0].value = event.model.dataHost.dataHost.__data__.useCaseLabel;   
+                                    }
+                                    return _self.ta.cloudTrace.setProperties(_self.aetOp, currentProps);
+                                }).then(function(ret) {
+                                    return _self.ta.cloudTrace.getProperties(_self.aetOp);
+                                }).then(function(ret) {
+                                    _self.aetProperties = ret.cfg;
+                                }).catch(function (err){
+                                    console.log("Operation failed" + JSON.stringify(err));
+                                }).finally(function() {
+                                    //TODO
+                                });
+
+                                break;
+                            }
+                        }
+                    }
+                },
+
+                probeConfig: undefined,
+
+                _probeConfig: function(event) {
+                    var _self = this;
+                    var currentProps = _self.aetProperties;
+
+                    // Update the property tree
+                    if (currentProps instanceof Array) {
+
+                        var probeCount = currentProps[0].sub_properties[0].sub_properties[0].sub_properties[0].sub_properties.length;
+                        for (var i = 0; i < probeCount; i++) {
+                            var probe = currentProps[0].sub_properties[0].sub_properties[0].sub_properties[0].sub_properties[i];
+                            if ("config_"+probe.name == event.currentTarget.id) {
+
+                                // If the probe isn't enabled, we shouldn't be here.
+                                // Configure icon should only be allowed after probe is enabled.
+                                if (!currentProps[0].sub_properties[0].sub_properties[0].sub_properties[0].sub_properties[i].value) {
+                                    return;
+                                }
+
+                                // Enable top level filter components so the tree will be fully populated.
+                                // Call Set/get properties for each change.
+                                if (currentProps[0].sub_properties[0].sub_properties[0].sub_properties[0].sub_properties[0].sub_properties instanceof Array) {
+
+                                    // Address Range Filter
+                                    currentProps[0].sub_properties[0].sub_properties[0].sub_properties[0].sub_properties[0].sub_properties[2].value = true;
+                                    _self.ta.cloudTrace.setProperties(_self.aetOp, currentProps).then(function(ret) {
+                                        return _self.ta.cloudTrace.getProperties(_self.aetOp);
+                                    }).then(function(ret) {
+                                        // Filters
+                                        currentProps = ret.cfg;
+                                        currentProps[0].sub_properties[0].sub_properties[0].sub_properties[0].sub_properties[0].sub_properties[3].value = true;
+                                        return _self.ta.cloudTrace.setProperties(_self.aetOp, currentProps);
+                                    }).then(function() {
+                                        return _self.ta.cloudTrace.getProperties(_self.aetOp);
+                                    }).then(function(ret) {
+                                        currentProps = ret.cfg;
+                                        // Addressing and ordering
+                                        currentProps[0].sub_properties[0].sub_properties[0].sub_properties[0].sub_properties[0].sub_properties[3].sub_properties[0].value = true;
+                                        // Type and size
+                                        currentProps[0].sub_properties[0].sub_properties[0].sub_properties[0].sub_properties[0].sub_properties[3].sub_properties[1].value = true;
+                                        // Priority and QoS
+                                        currentProps[0].sub_properties[0].sub_properties[0].sub_properties[0].sub_properties[0].sub_properties[3].sub_properties[2].value = true;
+                                        // Debug
+                                        currentProps[0].sub_properties[0].sub_properties[0].sub_properties[0].sub_properties[0].sub_properties[3].sub_properties[3].value = true;
+                                        // Security
+                                        currentProps[0].sub_properties[0].sub_properties[0].sub_properties[0].sub_properties[0].sub_properties[3].sub_properties[4].value = true;
+                                        // Cache and domain control
+                                        currentProps[0].sub_properties[0].sub_properties[0].sub_properties[0].sub_properties[0].sub_properties[3].sub_properties[5].value = true;
+                                        return _self.ta.cloudTrace.setProperties(_self.aetOp, currentProps);
+                                    }).then(function() {
+                                        return _self.ta.cloudTrace.getProperties(_self.aetOp);
+                                    }).then(function(ret) {
+                                        currentProps = ret.cfg;
+
+                                        // TODO - platforms is setting debug bits true here so explicitly initialize to false for now.
+                                        currentProps[0].sub_properties[0].sub_properties[0].sub_properties[0].sub_properties[0].sub_properties[3].sub_properties[3].sub_properties[0].value = false;
+                                        currentProps[0].sub_properties[0].sub_properties[0].sub_properties[0].sub_properties[0].sub_properties[3].sub_properties[3].sub_properties[1].value = false;
+                                        currentProps[0].sub_properties[0].sub_properties[0].sub_properties[0].sub_properties[0].sub_properties[3].sub_properties[3].sub_properties[2].value = false;
+                                        currentProps[0].sub_properties[0].sub_properties[0].sub_properties[0].sub_properties[0].sub_properties[3].sub_properties[3].sub_properties[3].value = false;
+                                        return _self.ta.cloudTrace.setProperties(_self.aetOp, currentProps);
+                                    }).then(function() {
+                                        return _self.ta.cloudTrace.getProperties(_self.aetOp);
+                                    }).then(function(ret) {
+                                        _self.aetProperties = ret.cfg;
+                                        // Write any changes to a temporary property tree (_self.workingAetProperties).
+                                        // If user applies them, overwrite _self.aetProperties with _self.workingAetProperties;
+                                        _self.$.settings.workingAetProperties = _self.aetProperties;
+                                    }).catch(function (err) {
+                                        console.log("Unable to decorate property tree.");
+                                    });
+                                }
+
+                                _self.currentProbe = probe.name;
+                                break;
+                            }
+                        }
+                    }
+
+                    _self.$.settings.probeConfigDialogHeading = _self.currentProbe + " settings";
+                    _self.$.settings.$.probeConfigDialog.toggle();
+                },
+
+                tabClickCallback: undefined,
+
+                _tabClickCallback: function(evt) {
+                    var tabIndex = evt.detail["selectedIndex"];
+                    var childTab = this.$.traceDataContainer.getChildTab(tabIndex);
+                    switch(childTab.innerText)
+                    {
+                        case this.graphDataTabName:
+                            this.$.cptracer2Graph.resize();
+                            break;
+                        case this.rawDataTabName:
+                            break;
+                        default:
+                        break;
+                    }
+                },
+
+                toggleSettings: undefined,
+
+                _toggleSettings: function(){
+                    console.log("Toggle");
+                    this.$.settings.open();
+                },
+
+                attached: function() {
+                    this.startStopState = "Start";
+                    this.$.cptracer2Graph.resize();
+                },
+
+                ready: function() {
+
+                    this.evtCallback = this._evtCallback.bind(this);
+                    this.startTrace = this._startTrace.bind(this);
+                    this.stopTrace = this._stopTrace.bind(this);
+                    this.tabClickCallback = this._tabClickCallback.bind(this);
+                    this.toggleSettings = this._toggleSettings.bind(this);
+
+                    this.selectedDomainChanged = this._selectedDomainChanged.bind(this);
+                    this.probeEnableCheckChanged = this._probeEnableCheckChanged.bind(this);
+                    this.probeConfig = this._probeConfig.bind(this);
+                },
+
+                detatched: function() {
+                    if (_self.traceOp !== undefined) {
+                        var handle = _self.traceOp;
+
+                        _self.traceOp = undefined;
+                        ta.cloudTrace.releaseOperation(handle);
+
+                        handle = _self.aetOp;
+                        _self.aetOp = undefined;
+                        ta.cloudTrace.releaseOperation(handle);
+                    }
+                }
+            });
+        </script>
+    </dom-module>
+</body>
+</html>

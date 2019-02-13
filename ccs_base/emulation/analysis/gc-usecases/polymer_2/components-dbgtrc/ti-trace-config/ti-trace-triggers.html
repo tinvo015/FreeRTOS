@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<!--
+    Copyright (c) 2018, Texas Instruments Incorporated
+    All rights reserved.
+
+    Redistribution and use in source and binary forms, with or without
+    modification, are permitted provided that the following conditions
+    are met:
+
+    *   Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+    *   Neither the name of Texas Instruments Incorporated nor the names of
+    its contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+    AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+    THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+    PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+    CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+    EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+    PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+    OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+    WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+    OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+    EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-->
+
+<link rel="import" href="../../components/polymer/polymer.html">
+<script src="../../components/webcomponentsjs/webcomponents-lite.js"></script>
+<script type='text/javascript' src="../../components/ti-core-assets/scripts/q.js"></script>
+<link rel="import" href="../../components/ti-core-stylesheets/ti-core-stylesheets.html">
+<link rel="import" href="../../components/iron-icons/iron-icons.html">
+<link rel="import" href="../../components/iron-collapse/iron-collapse.html">
+<link rel="import" href="../../components/ti-widget-common/ti-widget-radio-group.html">
+<link rel="import" href="../../components/ti-widget-common/ti-widget-radio-button.html">
+<link rel="import" href="../../components/ti-widget-common/ti-widget-checkbox.html">
+<link rel="import" href="../../components/paper-tooltip/paper-tooltip.html">
+<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../components/paper-card/paper-card.html">
+<link rel="import" href="../../components/paper-input/paper-input.html">
+<link rel="import" href="../../components/vaadin-grid/theme/material/vaadin-grid.html">
+<dom-module id="ti-trace-triggers">
+    <template>
+        <style is="custom-style">
+            vaadin-grid#triggerTable {
+                display: flex;
+                height: auto;
+                width: 100%;
+                white-space: normal;
+                --vaadin-grid-body-cell: {
+                    padding: 3px 0 3px 5px;
+                    white-space: nowrap;
+                }
+            };
+            .triggers {
+                --paper-input-container-input: {
+                    font-size: 12px;
+                    line-height: 20px;
+                };
+                --paper-input-container-label: {
+                    font-size: 12px;
+                };
+                --paper-input-container: {
+                    padding: 0;
+                }
+                --paper-radio-button-size: 12px;
+                font-size: 12px;
+            }
+            .triggers.floated-label-placeholder {
+                font-size: 10px;
+                line-height: 16px;
+            };
+            ti-widget-radio-button.triggers {
+                padding: 4px 4px;
+            }
+            paper-tooltip {
+                padding: 0px;
+            }
+            paper-checkbox {
+                --paper-checkbox-size: 12px;
+            }
+            paper-card {
+                margin: 0px;
+                width: 100%; /*calc(100% - 10px);*/
+                padding: 0px;
+                --paper-icon-button: {
+                    padding: 0px;
+                    margin: 0px;
+                    width: 24px;
+                    height: 24px;
+                }
+                --paper-card-content: {
+                    margin: 0px;
+                    padding: 8px;
+                }
+            }            
+            vaadin-grid paper-icon-button {
+                --paper-icon-button: {
+                    padding: 0px;
+                    margin: 0px;
+                    width: 20px;
+                    height: 20px;
+                }
+            }
+        </style>
+        <paper-card>
+            <div class="card-content">
+                <span class="title" style="font-weight:500">Triggers</span>
+                <span style="float:right">
+                    <template is="dom-if" if="[[hasErrors]]">
+                        <paper-icon-button id="errors" slot="top" icon="warning"></paper-icon-button>
+                        <paper-tooltip for="errors" class="custom">
+                            <table>
+                                <template is="dom-repeat" items="[[_triggerIssues]]">
+                                    <tr><td>[[item.msg]]</td></tr>
+                                </template>
+                            </table>
+                        </paper-tooltip>
+                    </template>
+                    <paper-icon-button id="expandButton" slot="top" icon="expand-more" on-tap="_flip"></paper-icon-button>
+                </span>
+                <iron-collapse id="triggersCollapse">
+                        <div style="padding:10px 20px">
+                            Triggers determine when trace collection is active by turning trace on or off when instructions at specific addresses are executed.
+                        </div>
+                        <span class="triggers" style="float:right;padding:7px">
+                            <paper-checkbox id="traceOn" checked="{{traceOn}}">Trace on from start</paper-checkbox>
+                        </span>
+                        <vaadin-grid id="triggerTable" items="{{triggers}}" class="triggers config-dialog" height-by-rows="true">
+                            <vaadin-grid-column flex-grow="0" width="32px">
+                                <template>
+                                    <div>
+                                        <template is="dom-if" if="[[item.hasError]]">
+                                            <paper-icon-button id="errors-[[index]]" slot="top" icon="warning"></paper-icon-button>
+                                            <paper-tooltip for="errors-[[index]]" class="custom" position="right">
+                                                <table>
+                                                    <template is="dom-repeat" items="[[_getTriggerIssues(index)]]">
+                                                        <tr><td>[[item.msg]]</td></tr>
+                                                    </template>
+                                                </table>
+                                            </paper-tooltip>
+                                        </template>
+                                    </div>
+                                </template>
+                            </vaadin-grid-column>
+                            <vaadin-grid-column flex-grow="2">
+                                <template>
+                                    <paper-input id="input-[[index]]" class="triggers" on-change="_locationChanged" label="[[item.location_hex]]" floating-label value="{{item.location::change}}"></paper-input>
+                                </template>
+                            </vaadin-grid-column>
+                            <vaadin-grid-column flex-grow="0" width="8rem">
+                                <template>
+                                    <ti-widget-radio-group selected-text="{{item.type}}" on-selected-text-changed="_validateAll" allow-empty-selection="false">
+                                        <ti-widget-radio-button class="triggers" id="radioStart-[[index]]" label="Start"></ti-widget-radio-button>
+                                        <ti-widget-radio-button class="triggers" id="radioStop-[[index]]" label="Stop"></ti-widget-radio-button>
+                                    </ti-widget-radio-group>
+                                </template>
+                            </vaadin-grid-column>
+                            <vaadin-grid-column flex-grow="0" width="32px">
+                                <template>
+                                    <paper-icon-button id="remove-[[index]]" icon="delete-forever"  on-tap="_deleteRow"></paper-icon-button>
+                                </template>
+                            </vaadin-grid-column>
+                        </vaadin-grid>
+                </iron-collapse>
+            </div>
+        </paper-card>
+    </template>
+    <script>
+        /* eslint "no-console" : "off" */
+        Polymer({
+            is: 'ti-trace-triggers',
+            properties: {
+                triggers: {
+                    type: Array,
+                    value: function () {return [{location: "", location_hex: "Label or address", type: "Start", hasError: false}];},
+                    reflectToAttribute: true,
+                    notify: true
+                },
+                _triggerIssues : {
+                    type: Array,
+                    value: function() {return [];}
+                },
+                ta : {
+                    type: Object,
+                    value: undefined
+                },
+                outFile : {
+                    type: String,
+                    value: undefined,
+                },
+                traceOn : {
+                    type: Boolean,
+                    value: true,
+                    notify: true,
+                    reflectToAttribute: true,
+                    observer: "_traceOnChanged"
+                },
+                hasErrors: {
+                    type: Boolean,
+                    value: false
+                }
+            },
+            ready: function()
+            {
+            },
+            _addRow: function()
+            {
+                this.push('triggers',{location: "", location_hex: "Label or address", type: "Start", hasError: false});
+            },
+            _deleteRow: function(e)
+            {
+                var indx;
+                if (e.hasOwnProperty("model")) {
+                    indx = e.model.index;
+                } else {
+                    indx = e;
+                }
+                var hadError = this.triggers[indx].hasError;
+                this.splice('triggers',indx,1);
+                if (indx == this.triggers.length) {
+                    this._addRow();
+                    this.shadowRoot.querySelector("#input-"+indx).invalid = false;
+                    this.set('triggers.'+indx+'.hasError', false);
+                }
+                this._validateAll();
+            },
+            _locationChanged: function (e)
+            {
+                if (e.hasOwnProperty("model") && (e.model.index !== undefined))
+                {
+                    var indx = e.model.index;
+                    var value = e.target.value;
+                    var hexAddr = 0;
+                    this.triggers[indx].location = value;
+                    var _self = this;
+                    if (value !== "") {
+                        var numeric = this._isNumericAddress(value);
+                        if (numeric !== null) {
+                            hexAddr = "0x"+numeric.toString(16);
+                            this.triggers[indx].location_hex = hexAddr;
+                            e.target.label = hexAddr;
+                            e.target.invalid = false;
+                            Polymer.RenderStatus.beforeNextRender(null, function() {
+                                _self._validateAll();
+                            });
+                        } else {
+                            var handle = undefined;
+                            var target = e.target;
+                            this.ta.cloudTrace.getOutFileHandle(this.outFile).then(function (ret) {
+                                handle = ret.handle;
+                                return _self.ta.cloudTrace.getSymbolValue(handle, value);
+                            }).then(function (ret) {
+                                hexAddr = "0x" + parseInt(ret.value).toString(16);
+                                console.log("value of "+value+" is: "+hexAddr);
+                                target.label = hexAddr;
+                                target.invalid = false;
+                            }).catch(function (err) {
+                                target.label = value + ": symbol not found!";
+                                target.value = "";
+                                target.invalid = true;
+                                hexAddr = undefined;
+                            }).finally(function () {
+                                if (handle !== undefined) {
+                                    _self.ta.cloudTrace.releaseOutFileHandle(handle);
+                                    _self.triggers[indx].location_hex = hexAddr;
+                                }
+                                _self._validateAll();
+                            });
+                        }
+                    } else {
+                        e.target.invalid = false;
+                        //this.triggers[indx].location_hex = "Label or address";
+                        Polymer.RenderStatus.beforeNextRender(null, function() {
+                            _self.set('triggers.'+indx+'.location_hex', "Label or address");
+                            _self._validateAll();
+                        });
+                    }
+                }
+            },
+            _isNumericAddress : function(val)
+            {
+                var match = val.match(/0x[0-9a-f]+/gi);
+                if ((match !== null) && (match[0].length == val.length)) {
+                    return parseInt(val,16);
+                }
+                match = val.match(/0[0-7]*/gi);
+                if ((match !== null) && (match[0].length == val.length)) {
+                    return parseInt(val,8);
+                }
+                match = val.match(/[1-9][0-9]*/gi);
+                if ((match !== null) && (match[0].length == val.length)) {
+                    return parseInt(val, 10);
+                }
+                return null;
+            },
+            _flip: function()
+            {
+                var expanded = this.$.triggersCollapse.opened;
+                if (expanded) {
+                    this._validateAll();
+                    this.$.expandButton.icon = 'expand-more';
+                } else {
+                    this.$.expandButton.icon = 'expand-less';
+                }
+                this.$.triggersCollapse.toggle();
+            },
+            _getTriggerIssues: function (indx)
+            {
+                return this._triggerIssues.filter(f => f.index == indx);
+            },
+            _traceOnChanged: function (n, o)
+            {
+                if (n !== undefined) {
+                    this._validateAll();
+                }
+            },
+            _validate: function(i)
+            {
+                var error = false;
+                var issues = [];
+                if (this.triggers[i].location_hex === undefined) {
+                    issues.push({index: i, msg: "trigger "+i+": missing location"});
+                    error = true;
+                }
+                if ((this.triggers[i].location_hex !== undefined) && 
+                    (this.triggers[i].location_hex !== "Label or address") &&
+                    !this.triggers[i].location_hex.startsWith("0x"))
+                {
+                    issues.push({index: i, msg: "trigger "+i+": missing location"});
+                    error = true;
+                }
+                if ((this.triggers[i].type !== "Start") && (this.triggers[i].type !== "Stop")) {
+                    issues.push({index: i, msg: "trigger "+i+": trigger type not selected"});
+                    error = true;
+                }
+                this.set('triggers.'+i+'.hasError',error);
+                return issues;
+            },
+            _validateAll: function()
+            {
+                if (this._triggerIssues === undefined) {
+                    return;
+                }
+                var hasErrors = false;
+                var allIssues = [];
+
+                var hasErrors = false;
+                var numStart = 0;
+                if (this.traceOn) {
+                    numStart = 1;
+                }
+                for (var i in this.triggers) {
+                    var issues = this._validate(i);
+                    if (issues.length > 0) {
+                        allIssues.push(...issues);
+                        hasErrors = true;
+                    }
+                    if (this.triggers[i].type === "Start") {
+                        numStart += 1;
+                    }
+                }
+
+                if (numStart == 0) {
+                    allIssues.push({index: -1, msg: "Trace-on is not set and there is no start trigger"});
+                    hasErrors = true;
+                }
+
+                this.hasErrors = hasErrors;
+                this.splice('_triggerIssues',0,this._triggerIssues.length,...allIssues);
+
+                // remove empty triggers that aren't last
+                for (var i = this.triggers.length - 2; i >= 0; i--) {
+                    if ((this.triggers[i].location === "") && (this.triggers[i].location_hex == "Label or address")) {
+                        this._deleteRow(i);
+                    }
+                }
+                var last = this.triggers.length - 1;
+                var input = this.shadowRoot.querySelector("#input-"+last);
+                if ((input !== undefined) && (input !== null)) {
+                    var invalid = input.invalid;
+                    if (!hasErrors && this.triggers[last].location !== "" && !invalid) {
+                        // last trigger not empty, add a row
+                        this._addRow();
+                    }
+                }
+            }
+        });
+    </script>
+</dom-module>

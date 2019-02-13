@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<!--
+    Copyright (c) 2018, Texas Instruments Incorporated
+    All rights reserved.
+
+    Redistribution and use in source and binary forms, with or without
+    modification, are permitted provided that the following conditions
+    are met:
+
+    *   Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+    *   Neither the name of Texas Instruments Incorporated nor the names of
+    its contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+    AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+    THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+    PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+    CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+    EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+    PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+    OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+    WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+    OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+    EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-->
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<script src="../../components/webcomponentsjs/webcomponents-lite.min.js"></script>
+
+<link rel="import" href="../../components/iron-collapse/iron-collapse.html">
+<link rel="import" href="../../components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../../components/ti-core-stylesheets/ti-core-stylesheets.html">
+<link rel="import" href="../../components/ti-widget-common/ti-widget-table.html">
+<link rel="import" href="../../components/ti-widget-common/ti-widget-label.html">
+<link rel="import" href="../../components/ti-widget-common/ti-widget-droplist.html">
+<link rel="import" href="../../components/ti-widget-common/ti-widget-input.html">
+<link rel="import" href="../../components/ti-widget-common/ti-widget-container.html">
+<link rel="import" href="../../components/ti-widget-card/ti-widget-card.html">
+<link rel="import" href="../../components/paper-checkbox/paper-checkbox.html">
+<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../components/polymer/polymer.html">
+<link rel="import" href="../../components-dbgtrc/ti-trace-common/ti-trace-common-style.html">
+</head>
+
+<body class="ti-theme" unresolved>
+    <dom-module id='ti-trace-receiver'>
+        <template>
+            <style include="ti-trace-common-style"> </style>
+            <style>
+                html {
+                    margin: 0px;
+                    padding: 0px;
+                }
+                body {
+                    padding: 0px;
+                    margin: 0;
+                    border: 0;
+                }
+                table {
+                    font-size: 14px;
+                    padding: 0px;
+                    margin: 0px;
+                }
+                td {
+                    text-align: left;
+                    padding: 1px;
+                    padding-left: 16px;
+                }
+                #ti_widget_input1 {
+                    font-size: 14px;
+                }
+
+            </style>
+
+            <paper-card heading="">
+                <div id="title" class="title">
+                    <paper-icon-button id="expandButton" slot="top" icon="expand-more" on-click="_toggle"></paper-icon-button>
+                    Export Interface Configuration
+                </div>
+                <iron-collapse id="collapse">
+                    <div id="desc" class="desc">
+                        Select the destination and export options of trace data.
+                    </div>
+                    <div id="params" class="params">
+                        <table>
+                            <tr>
+                                <td class="col1">
+                                    <ti-widget-label id="rcvrSelectLabel" label="Receiver:"></ti-widget-label>
+                                </td>
+                                <td class="col2">
+                                     <ti-widget-droplist id="rcvrSelectDrop" labels="ETB,Pro Trace" initial-index="0" selected-text={{selectedReceiver}}></ti-widget-droplist>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="col2">
+                                    <ti-widget-label id="bufferTypeLabel" label="Buffer Type:"></ti-widget-label>
+                                </td>
+                                <td class="col2">
+                                    <ti-widget-droplist id="bufferTypeDrop" labels="Circular,Stop-on-full" initial-index="0"></ti-widget-droplist>
+                                </td>
+                            </tr>
+                            <template is="dom-if" if="{{_isEqualTo(selectedReceiver, 'Pro Trace')}}">
+                                <tr>
+                                    <td class="col1">
+                                        <ti-widget-label id="numPinsLabel" label="Number of pins:"></ti-widget-label>
+                                    </td>
+                                    <td class="col2">
+                                        <ti-widget-droplist id="numPinsDrop" labels="1 pin, 2 pin, 4 pin" initial-index="0"></ti-widget-droplist>
+                                    </td>
+                                 </tr>
+                                <tr>
+                                    <td class="col1">
+                                        <ti-widget-label id="bufferSizeLabel" label="Buffer Size:"></ti-widget-label>
+                                    </td>
+                                    <td class="col2">
+                                        <ti-widget-droplist id="bufferSizeDrop" labels="64 kB,128 kB,256 kB,512 kB, 1 MB, 2MB, 4MB, 8MB, 16MB, 32MB, 64MB, 128MB, 256 MB, 512 MB, 1 GB" initial-index="0"></ti-widget-droplist>
+                                    </td>
+                                </tr>
+                            </template>
+                        </table>
+                    </div>
+                </iron-collapse>
+            </paper-card>
+
+        </template>
+
+        <script>
+            Polymer({
+                is : 'ti-trace-receiver',
+                properties : {
+                    config : {
+                        type: Array,
+                        value: (function(){
+                            return [
+                            {     
+                                name : "Receiver Settings",
+                                sub_properties: [
+                                    {
+                                        name : "Receiver",
+                                        type : "String",
+                                        value: "ETB",
+                                        sub_properties: [
+                                            {name : "Connection Type",         type : "String",  value : "Auto"},
+                                            {name : "Buffer Type",             type : "String",  value : "Circular"},
+                                            {name : "Trigger Type",            type : "String",  value : "None"},
+                                            {name : "Synchronize with target", type : "Boolean", value : true}
+                                        ]
+                                    }
+                                ]
+                            }
+                            ];
+                        }),
+                        notify: true,
+                        reflectToAttribute: true,
+                    }
+                },
+
+                _isEqualTo: function (value1, value2) {
+                    return value1 == value2;
+                },
+
+                _icon: function(expanded)
+                {
+                    return expanded ? 'expand-less' : 'expand-more';
+                },
+
+                _toggle: function() {
+                    this.$.collapse.toggle();
+                    this.$.expandButton.setAttribute('aria-expanded', this.$.collapse.opened);
+                    this.$.expandButton.icon = this._icon(this.$.collapse.opened);
+                },
+
+                ready : function () {
+
+                }
+            });
+        </script>
+    </dom-module>
+</body>
+
+</html>
