@@ -23,9 +23,9 @@
 
 if ($debugfile -eq "")
 {
-& "C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.2\common\bin\cspybat" -f "C:\ti - Copy\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\settings\freertos_demo.Debug.general.xcl" --backend -f "C:\ti - Copy\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\settings\freertos_demo.Debug.driver.xcl" 
+& "C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.2\common\bin\cspybat" -f "C:\RTOS\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\settings\freertos_demo.Debug.general.xcl" --backend -f "C:\RTOS\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\settings\freertos_demo.Debug.driver.xcl" 
 }
 else
 {
-& "C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.2\common\bin\cspybat" -f "C:\ti - Copy\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\settings\freertos_demo.Debug.general.xcl" --debug_file=$debugfile --backend -f "C:\ti - Copy\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\settings\freertos_demo.Debug.driver.xcl" 
+& "C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.2\common\bin\cspybat" -f "C:\RTOS\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\settings\freertos_demo.Debug.general.xcl" --debug_file=$debugfile --backend -f "C:\RTOS\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\settings\freertos_demo.Debug.driver.xcl" 
 }

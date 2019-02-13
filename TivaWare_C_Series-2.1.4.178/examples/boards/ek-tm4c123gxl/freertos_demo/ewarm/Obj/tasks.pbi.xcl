@@ -1,45 +1,45 @@
-"C:\ti - Copy\TivaWare_C_Series-2.1.4.178\third_party\FreeRTOS\Source\tasks.c"
+"C:\RTOS\TivaWare_C_Series-2.1.4.178\third_party\FreeRTOS\Source\tasks.c"
 -std=c11
 -ferror-limit=0
 -fbracket-depth=512
 -I
-C:\ti - Copy\TivaWare_C_Series-2.1.4.178\third_party\FreeRTOS\Source
+C:\RTOS\TivaWare_C_Series-2.1.4.178\third_party\FreeRTOS\Source
 -I
-C:\ti - Copy\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\.
+C:\RTOS\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\.
 -I
-C:\ti - Copy\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\..
+C:\RTOS\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\..
 -I
-C:\ti - Copy\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\..\..\..\..
+C:\RTOS\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\..\..\..\..
 -I
-C:\ti - Copy\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\..\..\..\..\third_party\FreeRTOS\Source\portable\IAR\ARM_CM4F
+C:\RTOS\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\..\..\..\..\third_party\FreeRTOS\Source\portable\IAR\ARM_CM4F
 -I
-C:\ti - Copy\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\..\..\..\..\third_party\FreeRTOS
+C:\RTOS\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\..\..\..\..\third_party\FreeRTOS
 -I
 C:\ti - Copy\TivaWare_C_Series-2.1.4.178\third_party\FreeRTOS\Source\include
 -I
-C:\ti - Copy\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\..\..\..\..\third_party\FreeRTOS\Source\include
+C:\RTOS\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\..\..\..\..\third_party\FreeRTOS\Source\include
 -I
-C:\ti - Copy\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\..\..\..\..\third_party
+C:\RTOS\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\..\..\..\..\third_party
 -I
 C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.2\arm\inc
 -I
 C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.2\arm\inc\c
 -I
-C:\ti - Copy\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo
+C:\RTOS\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo
 -I
-C:\ti - Copy\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl
+C:\RTOS\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl
 -I
-C:\ti - Copy\TivaWare_C_Series-2.1.4.178
+C:\RTOS\TivaWare_C_Series-2.1.4.178
 -I
-C:\ti - Copy\TivaWare_C_Series-2.1.4.178\third_party\FreeRTOS\Source\portable\IAR\ARM_CM4F
+C:\RTOS\TivaWare_C_Series-2.1.4.178\third_party\FreeRTOS\Source\portable\IAR\ARM_CM4F
 -I
-C:\ti - Copy\TivaWare_C_Series-2.1.4.178\third_party\FreeRTOS
--I
-C:\ti - Copy\TivaWare_C_Series-2.1.4.178\third_party\FreeRTOS\Source\include
+C:\RTOS\TivaWare_C_Series-2.1.4.178\third_party\FreeRTOS
 -I
 C:\ti - Copy\TivaWare_C_Series-2.1.4.178\third_party\FreeRTOS\Source\include
 -I
-C:\ti - Copy\TivaWare_C_Series-2.1.4.178\third_party
+C:\RTOS\TivaWare_C_Series-2.1.4.178\third_party\FreeRTOS\Source\include
+-I
+C:\RTOS\TivaWare_C_Series-2.1.4.178\third_party
 -D__CHAR_BITS__=8
 -D__CHAR_MAX__=0xff
 -D__CHAR_MIN__=0

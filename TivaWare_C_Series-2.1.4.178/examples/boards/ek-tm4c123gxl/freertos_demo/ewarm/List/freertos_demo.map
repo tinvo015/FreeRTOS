@@ -1,54 +1,37 @@
 ###############################################################################
 #
-# IAR ELF Linker V8.32.2.178/W32 for ARM                  12/Feb/2019  20:31:30
+# IAR ELF Linker V8.32.2.178/W32 for ARM                  12/Feb/2019  21:43:38
 # Copyright 2007-2018 IAR Systems AB.
 #
 #    Output file  =  
-#        C:\ti -
-#        Copy\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\ewarm\Exe\freertos_demo.out
+#        C:\RTOS\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\ewarm\Exe\freertos_demo.out
 #    Map file     =  
-#        C:\ti -
-#        Copy\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\ewarm\List\freertos_demo.map
+#        C:\RTOS\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\ewarm\List\freertos_demo.map
 #    Command line =  
-#        -f C:\Users\TINVO~1\AppData\Local\Temp\EWF91F.tmp ("C:\ti -
-#        Copy\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\ewarm\Obj\buttons.o"
-#        "C:\ti -
-#        Copy\TivaWare_C_Series-2.1.4.178\driverlib\ewarm\Exe\driverlib.a"
-#        "C:\ti -
-#        Copy\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\ewarm\Obj\freertos_demo.o"
-#        "C:\ti -
-#        Copy\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\ewarm\Obj\heap_2.o"
-#        "C:\ti -
-#        Copy\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\ewarm\Obj\led_task.o"
-#        "C:\ti -
-#        Copy\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\ewarm\Obj\list.o"
-#        "C:\ti -
-#        Copy\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\ewarm\Obj\port.o"
-#        "C:\ti -
-#        Copy\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\ewarm\Obj\portasm.o"
-#        "C:\ti -
-#        Copy\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\ewarm\Obj\queue.o"
-#        "C:\ti -
-#        Copy\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\ewarm\Obj\rgb.o"
-#        "C:\ti -
-#        Copy\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\ewarm\Obj\sleep.o"
-#        "C:\ti -
-#        Copy\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\ewarm\Obj\startup_ewarm.o"
-#        "C:\ti -
-#        Copy\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\ewarm\Obj\switch_task.o"
-#        "C:\ti -
-#        Copy\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\ewarm\Obj\tasks.o"
-#        "C:\ti -
-#        Copy\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\ewarm\Obj\uartstdio.o"
-#        "C:\ti -
-#        Copy\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\ewarm\Obj\ustdlib.o"
+#        -f C:\Users\TINVO~1\AppData\Local\Temp\EW6B1B.tmp
+#        (C:\RTOS\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\ewarm\Obj\buttons.o
+#        C:\RTOS\TivaWare_C_Series-2.1.4.178\driverlib\ewarm\Exe\driverlib.a
+#        C:\RTOS\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\ewarm\Obj\freertos_demo.o
+#        C:\RTOS\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\ewarm\Obj\heap_2.o
+#        C:\RTOS\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\ewarm\Obj\led_task.o
+#        C:\RTOS\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\ewarm\Obj\list.o
+#        C:\RTOS\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\ewarm\Obj\port.o
+#        C:\RTOS\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\ewarm\Obj\portasm.o
+#        C:\RTOS\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\ewarm\Obj\queue.o
+#        C:\RTOS\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\ewarm\Obj\rgb.o
+#        C:\RTOS\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\ewarm\Obj\sleep.o
+#        C:\RTOS\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\ewarm\Obj\startup_ewarm.o
+#        C:\RTOS\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\ewarm\Obj\switch_task.o
+#        C:\RTOS\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\ewarm\Obj\tasks.o
+#        C:\RTOS\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\ewarm\Obj\uartstdio.o
+#        C:\RTOS\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\ewarm\Obj\ustdlib.o
 #        --redirect _Printf=_PrintfTiny --redirect _Scanf=_ScanfSmallNoMb
-#        --no_out_extension -o "C:\ti -
-#        Copy\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\ewarm\Exe\freertos_demo.out"
-#        --map "C:\ti -
-#        Copy\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\ewarm\List\freertos_demo.map"
-#        --config "C:\ti -
-#        Copy\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\freertos_demo.icf"
+#        --no_out_extension -o
+#        C:\RTOS\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\ewarm\Exe\freertos_demo.out
+#        --map
+#        C:\RTOS\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\ewarm\List\freertos_demo.map
+#        --config
+#        C:\RTOS\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\freertos_demo.icf
 #        --semihosting --entry __iar_program_start --vfe --text_out locale)
 #
 ###############################################################################
@@ -190,7 +173,7 @@ command line/config:
     ---------------------------------------------
     Total:
 
-C:\ti - Copy\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\ewarm\Obj: [1]
+C:\RTOS\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\ewarm\Obj: [1]
     buttons.o               180        1        3
     freertos_demo.o         168       48        4
     heap_2.o                228      354   30 024
@@ -421,7 +404,7 @@ xTickCount              0x2000'76f0     0x4  Data  Lc  tasks.o [1]
 xYieldPending           0x2000'7700     0x4  Data  Lc  tasks.o [1]
 
 
-[1] = C:\ti - Copy\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\ewarm\Obj
+[1] = C:\RTOS\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\ewarm\Obj
 [2] = dl7M_tln.a
 [3] = driverlib.a
 [4] = m7M_tls.a

@@ -2,7 +2,7 @@
 
 "C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.2\arm\bin\armlmiftdi.dll" 
 
-"C:\ti - Copy\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\ewarm\Exe\freertos_demo.out" 
+"C:\RTOS\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\ewarm\Exe\freertos_demo.out" 
 
 --plugin="C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.2\arm\bin\armbat.dll" 
 
