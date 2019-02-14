@@ -1251,4 +1251,22 @@
             <name>$PROJ_DIR$\..\..\..\..\utils\ustdlib.c</name>
         </file>
     </group>
+    <file>
+        <name>$PROJ_DIR$\..\lab2a.h</name>
+    </file>
+    <file>
+        <name>$PROJ_DIR$\..\myHeader.h</name>
+    </file>
+    <file>
+        <name>$PROJ_DIR$\..\SSD2119.c</name>
+    </file>
+    <file>
+        <name>$PROJ_DIR$\..\SSD2119.h</name>
+    </file>
+    <file>
+        <name>$PROJ_DIR$\..\switch.c</name>
+    </file>
+    <file>
+        <name>$PROJ_DIR$\..\traffic.c</name>
+    </file>
 </project>

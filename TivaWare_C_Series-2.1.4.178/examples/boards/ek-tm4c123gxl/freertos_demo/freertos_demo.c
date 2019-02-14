@@ -38,6 +38,33 @@
 #include "task.h"
 #include "queue.h"
 #include "semphr.h"
+#include "clockColtrol.h"
+#include "traffic.h"
+#include "lab2a.h"
+#include "myHeader.h"
+
+// FSM state definition
+const int OFF = 0;
+const int GO = 1;
+const int STOP = 2;
+const int WARN = 3;
+
+volatile int state = 0;
+volatile int next_state = 0;
+
+void passenger(void *p);
+void startStop(void *p);
+void control(void *p);
+void FSM(void);
+
+volatile int start_stop_count = 0;
+volatile int passenger_count = 0;
+volatile int FSM_count = 0;
+volatile int start_stop_status = 0;
+volatile int passenger_status = 0;
+
+xQueueHandle Global_Queue_Handle = NULL;
+
 
 //*****************************************************************************
 //
@@ -170,44 +197,63 @@ main(void)
     //
     // Initialize the UART and configure it for 115,200, 8-N-1 operation.
     //
-    ConfigureUART();
+    // ConfigureUART();
 
     //
     // Print demo introduction.
     //
-    UARTprintf("\n\nWelcome to the EK-TM4C123GXL FreeRTOS Demo!\n");
+    // UARTprintf("\n\nWelcome to the EK-TM4C123GXL FreeRTOS Demo!\n");
 
     //
     // Create a mutex to guard the UART.
     //
-    g_pUARTSemaphore = xSemaphoreCreateMutex();
+    // g_pUARTSemaphore = xSemaphoreCreateMutex();
 
     //
     // Create the LED task.
     //
-    if(LEDTaskInit() != 0)
-    {
-
-        while(1)
-        {
-        }
-    }
+//    if(LEDTaskInit() != 0)
+//    {
+//
+//        while(1)
+//        {
+//        }
+//    }
 
     //
     // Create the switch task.
     //
-    if(SwitchTaskInit() != 0)
-    {
-
-        while(1)
-        {
-        }
-    }
+//    if(SwitchTaskInit() != 0)
+//    {
+//
+//        while(1)
+//        {
+//        }
+//    }
 
     //
     // Start the scheduler.  This should not return.
     //
-     
+		
+		// clockControl code
+//		SYS_Init();
+		
+		LED_Init();
+		LCD_Init();
+		Touch_Init();
+		LED_Init();
+		// LCD_Calibration();
+		// LCD_Init();
+		DrawButton();
+		
+		
+		// xTaskCreate(Lab5A, (signed char*) "Lab5A", 1024, NULL, 1, NULL);
+		
+		Global_Queue_Handle = xQueueCreate(3, sizeof(int));
+		xTaskCreate(startStop, (signed char*) "startStop", 1024, NULL, 2, NULL);
+		xTaskCreate(passenger, (signed char*) "passenger", 1024, NULL, 1, NULL);
+		xTaskCreate(control, (signed char*) "control", 1024, NULL, 3, NULL);
+		
     vTaskStartScheduler();
 
     //
@@ -218,4 +264,101 @@ main(void)
     while(1)
     {
     }
+}
+
+void startStop(void *p) {
+	while (1) {
+		LCD_DisplayTouchPos();
+		if (SwitchStart_Input()) {
+			start_stop_count++;
+			if (start_stop_count == 2) {
+				start_stop_count = 0;
+				start_stop_status = 1;
+			}
+		} else {
+			start_stop_count = 0;
+			start_stop_status = 0;
+		}
+		vTaskDelay(1000);
+	}
+}
+
+void passenger(void *p) {
+	while (1) {
+		LCD_DisplayTouchPos();
+		if (SwitchPedest_Input()) {
+			passenger_count++;
+			if (passenger_count == 2) {
+				passenger_count = 0;
+				passenger_status = 1;
+			}
+		} else {
+			passenger_count = 0;
+			passenger_status = 0;
+		}
+		vTaskDelay(1000);
+	}
+}
+
+void control(void *p) {
+	while (1) {
+		LCD_DisplayTouchPos();
+		FSM_count++;
+		if (FSM_count == 5 || start_stop_status || passenger_status) {
+			FSM();
+		}
+		if (FSM_count == 5) {
+			FSM_count = 0;
+		}
+		vTaskDelay(1000);
+	}
+}
+
+// executes the output of the parameter state
+void readEvent(int state) {
+  GPIODATA_PORTE &= ~0xFF;
+	if (state == OFF) {
+    GPIODATA_PORTE &= ~0xFF;
+	} else if (state == GO) {
+    GPIODATA_PORTE |= PIN2;
+  } else if (state == STOP) {
+    GPIODATA_PORTE |= PIN0;
+  } else if (state == WARN) {
+    GPIODATA_PORTE |= PIN1;
+  }
+}
+
+void FSM(void) 
+{
+  if (state == GO)
+  {
+    if (start_stop_status)
+      next_state = OFF;
+    else if (passenger_status)
+      next_state = WARN;
+    else
+      next_state = STOP;
+  }
+  else if (state == STOP)
+  {
+    if (start_stop_status)
+      next_state = OFF;
+    else
+      next_state = GO;
+  }
+  else if (state == WARN)
+  {
+    if (start_stop_status)
+      next_state = OFF;
+    else
+      next_state = STOP;
+  }
+  else
+  {
+    if (start_stop_status)
+      next_state = STOP;
+  }
+  
+  state = next_state;         // assign the current state to the next state
+	readEvent(state);
 }

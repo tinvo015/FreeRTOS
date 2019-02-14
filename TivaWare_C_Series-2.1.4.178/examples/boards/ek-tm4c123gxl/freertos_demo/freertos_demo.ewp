@@ -355,6 +355,9 @@
                     <state>C:\ti - Copy\TivaWare_C_Series-2.1.4.178\third_party\FreeRTOS\Source\include</state>
                     <state>$PROJ_DIR$\..\..\..\..\third_party\FreeRTOS\Source\include</state>
                     <state>$PROJ_DIR$\..\..\..\..\third_party</state>
+                    <state>C:\TI-CMSIS-Devices-8636\TI\LM4F\Include</state>
+                    <state>C:\Users\taojin\Desktop\EE 474\Lab\headers</state>
+                    <state>C:\ti\TivaWare_C_Series-2.1.4.178</state>
                 </option>
                 <option>
                     <name>CCStdIncCheck</name>
@@ -1117,4 +1120,22 @@
             <name>$PROJ_DIR$\..\..\..\..\utils\ustdlib.c</name>
         </file>
     </group>
+    <file>
+        <name>$PROJ_DIR$\..\lab2a.h</name>
+    </file>
+    <file>
+        <name>$PROJ_DIR$\..\myHeader.h</name>
+    </file>
+    <file>
+        <name>$PROJ_DIR$\..\SSD2119.c</name>
+    </file>
+    <file>
+        <name>$PROJ_DIR$\..\SSD2119.h</name>
+    </file>
+    <file>
+        <name>$PROJ_DIR$\..\switch.c</name>
+    </file>
+    <file>
+        <name>$PROJ_DIR$\..\traffic.c</name>
+    </file>
 </project>

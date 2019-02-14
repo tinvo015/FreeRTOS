@@ -21,6 +21,12 @@ C:\RTOS\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\
 -I
 C:\RTOS\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\..\..\..\..\third_party
 -I
+C:\TI-CMSIS-Devices-8636\TI\LM4F\Include
+-I
+C:\Users\taojin\Desktop\EE 474\Lab\headers
+-I
+C:\ti\TivaWare_C_Series-2.1.4.178
+-I
 C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.2\arm\inc
 -I
 C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.2\arm\inc\c
@@ -40,6 +46,12 @@ C:\ti - Copy\TivaWare_C_Series-2.1.4.178\third_party\FreeRTOS\Source\include
 C:\RTOS\TivaWare_C_Series-2.1.4.178\third_party\FreeRTOS\Source\include
 -I
 C:\RTOS\TivaWare_C_Series-2.1.4.178\third_party
+-I
+C:\TI-CMSIS-Devices-8636\TI\LM4F\Include
+-I
+C:\Users\taojin\Desktop\EE 474\Lab\headers
+-I
+C:\ti\TivaWare_C_Series-2.1.4.178
 -D__CHAR_BITS__=8
 -D__CHAR_MAX__=0xff
 -D__CHAR_MIN__=0
