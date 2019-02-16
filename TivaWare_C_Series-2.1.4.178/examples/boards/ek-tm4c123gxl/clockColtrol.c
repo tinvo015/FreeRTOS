@@ -25,7 +25,7 @@ unsigned int tempTable(double temperature);
 void LCD_DisplayTouchPos(void);
 void LCD_DrawCube(unsigned short startX, unsigned short startY, unsigned short sildeLen, unsigned short Color);
 void printData(void);
-void isPressed(void);
+bool isPressed(void);
 
 volatile bool blink = 0;
 volatile int offset_X = 0;
@@ -47,13 +47,10 @@ void Lab5A(void *p)
 	}
 }
 
-void isPressed(void)
+bool isPressed(void)
 {
 	int z = (int)Touch_ReadZ1();
-	if (z > 1000)
-		pressed = 1;
-	else
-		pressed = 0;
+	return z >= 1000;
 }
 
 void printData(void)

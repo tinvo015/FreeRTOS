@@ -12,7 +12,7 @@ unsigned int tempTable(double temperature);
 void LCD_DisplayTouchPos(void);
 void LCD_DrawCube(unsigned short startX, unsigned short startY, unsigned short sildeLen, unsigned short Color);
 void printData(void);
-void isPressed(void);
+bool isPressed(void);
 void Lab5A(void *p);
 
 #endif

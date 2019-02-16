@@ -1,6 +1,6 @@
 ###############################################################################
 #
-# IAR ELF Linker V8.32.2.178/W32 for ARM                  14/Feb/2019  00:54:36
+# IAR ELF Linker V8.32.2.178/W32 for ARM                  15/Feb/2019  21:23:03
 # Copyright 2007-2018 IAR Systems AB.
 #
 #    Output file  =  
@@ -8,7 +8,7 @@
 #    Map file     =  
 #        C:\RTOS\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\ewarm\List\freertos_demo.map
 #    Command line =  
-#        -f C:\Users\taojin\AppData\Local\Temp\EW3F1F.tmp
+#        -f C:\Users\taojin\AppData\Local\Temp\EW28D3.tmp
 #        (C:\RTOS\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\ewarm\Obj\buttons.o
 #        C:\RTOS\TivaWare_C_Series-2.1.4.178\driverlib\ewarm\Exe\driverlib.a
 #        C:\RTOS\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\ewarm\Obj\freertos_demo.o
@@ -79,36 +79,36 @@ No sections matched the following patterns:
   .intvec            const            0x0   0x26c  startup_ewarm.o [1]
                                   - 0x26c   0x26c
 
-"P1":                                      0x1bf5
-  .text              ro code        0x26c   0x96c  SSD2119.o [1]
-  .text              ro code        0xbd8    0x48  FltToDbl.o [4]
-  .text              ro code        0xc20   0x594  tasks.o [1]
-  .text              ro code       0x11b4   0x198  port.o [1]
-  .text              ro code       0x134c    0x90  list.o [1]
-  .text              ro code       0x13dc   0x1dc  freertos_demo.o [1]
-  .text              ro code       0x15b8    0xe4  heap_2.o [1]
-  .text              ro code       0x169c    0x3a  ABImemset48.o [5]
-  .text              ro code       0x16d6    0x7a  lz77_init_single.o [5]
-  .text              ro code       0x1750    0x28  port.o [1]
-  CODE               ro code       0x1778    0xa8  portasm.o [1]
-  .text              ro code       0x1820   0x130  traffic.o [1]
-  .text              ro code       0x1950    0xc4  queue.o [1]
-  .rodata            const         0x1a14   0x1e0  SSD2119.o [1]
-  .text              ro code       0x1bf4    0x3a  zero_init3.o [5]
-  .text              ro code       0x1c30    0x28  data_init.o [5]
-  .text              ro code       0x1c58    0x22  fpinit_M.o [4]
-  .iar.init_table    const         0x1c7c    0x20  - Linker created -
-  .text              ro code       0x1c9c    0x1e  cmain.o [5]
-  .text              ro code       0x1cba     0x4  low_level_init.o [2]
-  .text              ro code       0x1cbe     0x4  exit.o [2]
-  .text              ro code       0x1cc4     0xa  cexit.o [5]
-  .text              ro code       0x1cd0    0x14  exit.o [6]
-  .text              ro code       0x1ce4    0x1a  startup_ewarm.o [1]
-  .text              ro code       0x1cfe     0xc  cstartup_M.o [5]
-  .rodata            const         0x1d0a     0x0  zero_init3.o [5]
-  .rodata            const         0x1d0a     0x0  lz77_init_single.o [5]
-  Initializer bytes  const         0x1d0a   0x157  <for P2-1>
-                                 - 0x1e61  0x1bf5
+"P1":                                      0x1b81
+  .text              ro code        0x26c   0x974  SSD2119.o [1]
+  .text              ro code        0xbe0    0x48  FltToDbl.o [4]
+  .text              ro code        0xc28   0x540  tasks.o [1]
+  .text              ro code       0x1168   0x198  port.o [1]
+  .text              ro code       0x1300    0x90  list.o [1]
+  .text              ro code       0x1390   0x170  freertos_demo.o [1]
+  .text              ro code       0x1500    0xe4  heap_2.o [1]
+  .text              ro code       0x15e4    0x3a  ABImemset48.o [5]
+  .text              ro code       0x161e    0x7a  lz77_init_single.o [5]
+  .text              ro code       0x1698    0x28  port.o [1]
+  CODE               ro code       0x16c0    0xa8  portasm.o [1]
+  .text              ro code       0x1768   0x20c  traffic.o [1]
+  .rodata            const         0x1974   0x1e0  SSD2119.o [1]
+  .text              ro code       0x1b54    0x3a  zero_init3.o [5]
+  .rodata            const         0x1b90    0x2c  traffic.o [1]
+  .text              ro code       0x1bbc    0x28  data_init.o [5]
+  .text              ro code       0x1be4    0x22  fpinit_M.o [4]
+  .iar.init_table    const         0x1c08    0x20  - Linker created -
+  .text              ro code       0x1c28    0x1e  cmain.o [5]
+  .text              ro code       0x1c46     0x4  low_level_init.o [2]
+  .text              ro code       0x1c4a     0x4  exit.o [2]
+  .text              ro code       0x1c50     0xa  cexit.o [5]
+  .text              ro code       0x1c5c    0x14  exit.o [6]
+  .text              ro code       0x1c70    0x1a  startup_ewarm.o [1]
+  .text              ro code       0x1c8a     0xc  cstartup_M.o [5]
+  .rodata            const         0x1c96     0x0  zero_init3.o [5]
+  .rodata            const         0x1c96     0x0  lz77_init_single.o [5]
+  Initializer bytes  const         0x1c96   0x157  <for P2-1>
+                                 - 0x1ded  0x1b81
 
 "P2", part 1 of 3:                         0x754c
   P2-1                        0x2000'0000  0x754c  <Init block>
@@ -116,27 +116,27 @@ No sections matched the following patterns:
     .data            inited   0x2000'7548     0x4  port.o [1]
                             - 0x2000'754c  0x754c
 
-"P2", part 2 of 3:                          0x224
+"P2", part 2 of 3:                          0x22c
   .bss               zero     0x2000'754c   0x140  tasks.o [1]
   .bss               zero     0x2000'768c    0x9c  tasks.o [1]
-  .bss               zero     0x2000'7728    0x1c  freertos_demo.o [1]
-  .bss               zero     0x2000'7744    0x10  traffic.o [1]
-  .bss               zero     0x2000'7754     0xc  port.o [1]
-  .bss               zero     0x2000'7760     0x6  SSD2119.o [1]
-  .bss               zero     0x2000'7768     0x4  freertos_demo.o [1]
-  .bss               zero     0x2000'776c     0x4  SSD2119.o [1]
-                            - 0x2000'7770   0x224
+  .bss               zero     0x2000'7728    0x18  freertos_demo.o [1]
+  .bss               zero     0x2000'7740    0x10  traffic.o [1]
+  .bss               zero     0x2000'7750    0x10  traffic.o [1]
+  .bss               zero     0x2000'7760     0xc  port.o [1]
+  .bss               zero     0x2000'776c     0x6  SSD2119.o [1]
+  .bss               zero     0x2000'7772     0x4  SSD2119.o [1]
+                            - 0x2000'7776   0x22a
 
 "P2", part 3 of 3:                          0x200
-  .noinit            uninit   0x2000'7770   0x200  startup_ewarm.o [1]
-                            - 0x2000'7970   0x200
+  .noinit            uninit   0x2000'7778   0x200  startup_ewarm.o [1]
+                            - 0x2000'7978   0x200
 
 Unused ranges:
 
          From           To      Size
          ----           --      ----
-       0x1e61     0x3'ffff  0x3'e19f
-  0x2000'7970  0x2000'7fff     0x690
+       0x1ded     0x3'ffff  0x3'e213
+  0x2000'7978  0x2000'7fff     0x688
 
 
 *******************************************************************************
@@ -146,12 +146,12 @@ Unused ranges:
           Address      Size
           -------      ----
 Zero (__iar_zero_init3)
-    1 destination range, total size 0x224:
-          0x2000'754c   0x224
+    1 destination range, total size 0x22a:
+          0x2000'754c   0x22a
 
 Copy/lz77 (__iar_lz77_init_single3)
     1 source range, total size 0x157 (1% of destination):
-               0x1d0a   0x157
+               0x1c96   0x157
     1 destination range, total size 0x754c:
           0x2000'0000  0x754c
 
@@ -168,18 +168,17 @@ command line/config:
     Total:
 
 C:\RTOS\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\ewarm\Obj: [1]
-    SSD2119.o             2 412      480       10
-    freertos_demo.o         476                32
+    SSD2119.o             2 420      480       10
+    freertos_demo.o         368                24
     heap_2.o                228      342   30 024
     list.o                  144
     port.o                  448        1       16
     portasm.o               168
-    queue.o                 196
     startup_ewarm.o          26      620      512
-    tasks.o               1 428               476
-    traffic.o               304                16
+    tasks.o               1 344               476
+    traffic.o               524       44       32
     ---------------------------------------------
-    Total:                5 830    1 443   31 086
+    Total:                5 670    1 487   31 094
 
 dl7M_tln.a: [2]
     exit.o                    4
@@ -213,10 +212,10 @@ shb_l.a: [6]
     ---------------------------------------------
     Total:                   20
 
-    Gaps                      6        2        2
+    Gaps                      4        4
     Linker created                    32
 -------------------------------------------------
-    Grand Total:          6 300    1 477   31 088
+    Grand Total:          6 138    1 523   31 094
 
 
 *******************************************************************************
@@ -225,166 +224,168 @@ shb_l.a: [6]
 
 Entry                       Address    Size  Type      Object
 -----                       -------    ----  ----      ------
-.iar.init_table$$Base        0x1c7c           --   Gb  - Linker created -
-.iar.init_table$$Limit       0x1c9c           --   Gb  - Linker created -
-?main                        0x1c9d          Code  Gb  cmain.o [5]
-ADC_Init                      0x8af    0x5e  Code  Gb  SSD2119.o [1]
-ADC_Read                      0x917    0x1a  Code  Gb  SSD2119.o [1]
-ADC_SetChannel                0x931    0x28  Code  Gb  SSD2119.o [1]
-ASCII                        0x1a14   0x1e0  Data  Lc  SSD2119.o [1]
-DrawButton                   0x18a3    0x20  Code  Gb  traffic.o [1]
-FSM                          0x153f    0x46  Code  Gb  freertos_demo.o [1]
-FSM_count               0x2000'7738     0x4  Data  Gb  freertos_demo.o [1]
-FaultISR                     0x1cfb     0x2  Code  Lc  startup_ewarm.o [1]
-Global_Queue_Handle     0x2000'7768     0x4  Data  Gb  freertos_demo.o [1]
-IntDefaultHandler            0x1cfd     0x2  Code  Lc  startup_ewarm.o [1]
-LCD_DisplayTouchPos          0x1851    0x52  Code  Gb  traffic.o [1]
-LCD_DrawFilledCircle          0x7bb    0xbc  Code  Gb  SSD2119.o [1]
-LCD_DrawPixel                 0x787    0x28  Code  Gb  SSD2119.o [1]
+.iar.init_table$$Base        0x1c08           --   Gb  - Linker created -
+.iar.init_table$$Limit       0x1c28           --   Gb  - Linker created -
+?main                        0x1c29          Code  Gb  cmain.o [5]
+ADC_Init                      0x8b7    0x5e  Code  Gb  SSD2119.o [1]
+ADC_Read                      0x91f    0x1a  Code  Gb  SSD2119.o [1]
+ADC_SetChannel                0x939    0x28  Code  Gb  SSD2119.o [1]
+ASCII                        0x1974   0x1e0  Data  Lc  SSD2119.o [1]
+DrawButton                   0x183f    0x20  Code  Gb  traffic.o [1]
+FSM                          0x18e1    0x46  Code  Gb  traffic.o [1]
+FaultISR                     0x1c87     0x2  Code  Lc  startup_ewarm.o [1]
+IntDefaultHandler            0x1c89     0x2  Code  Lc  startup_ewarm.o [1]
+LCD_Calibration              0x179d    0x4e  Code  Gb  traffic.o [1]
+LCD_DisplayTouchPos          0x17ed    0x52  Code  Gb  traffic.o [1]
+LCD_DrawFilledCircle          0x7c3    0xbc  Code  Gb  SSD2119.o [1]
+LCD_DrawPixel                 0x78f    0x28  Code  Gb  SSD2119.o [1]
 LCD_GPIOInit                  0x26d    0x56  Code  Gb  SSD2119.o [1]
 LCD_Init                      0x32d   0x17e  Code  Gb  SSD2119.o [1]
-LCD_PrintBinary               0x6b9    0x78  Code  Gb  SSD2119.o [1]
-LCD_PrintChar                 0x4bf    0x86  Code  Gb  SSD2119.o [1]
-LCD_PrintFloat                0x73d    0x4a  Code  Gb  SSD2119.o [1]
-LCD_PrintHex                  0x657    0x62  Code  Gb  SSD2119.o [1]
-LCD_PrintInteger              0x609    0x4e  Code  Gb  SSD2119.o [1]
-LCD_PrintString               0x545    0x18  Code  Gb  SSD2119.o [1]
-LCD_SetCursor                 0x55d     0xa  Code  Gb  SSD2119.o [1]
-LCD_SetTextColor              0x567     0xe  Code  Gb  SSD2119.o [1]
+LCD_PrintBinary               0x6c1    0x78  Code  Gb  SSD2119.o [1]
+LCD_PrintChar                 0x4c7    0x86  Code  Gb  SSD2119.o [1]
+LCD_PrintFloat                0x745    0x4a  Code  Gb  SSD2119.o [1]
+LCD_PrintHex                  0x65f    0x62  Code  Gb  SSD2119.o [1]
+LCD_PrintInteger              0x611    0x4e  Code  Gb  SSD2119.o [1]
+LCD_PrintString               0x54d    0x18  Code  Gb  SSD2119.o [1]
+LCD_SetCursor                 0x565     0xa  Code  Gb  SSD2119.o [1]
+LCD_SetTextColor              0x56f     0xe  Code  Gb  SSD2119.o [1]
 LCD_WriteCommand              0x2c3    0x26  Code  Gb  SSD2119.o [1]
 LCD_WriteData                 0x2e9    0x24  Code  Gb  SSD2119.o [1]
-LED_Init                     0x18c3    0x48  Code  Gb  traffic.o [1]
-NmiSR                        0x1cf9     0x2  Code  Lc  startup_ewarm.o [1]
-Region$$Table$$Base          0x1c7c           --   Gb  - Linker created -
-Region$$Table$$Limit         0x1c9c           --   Gb  - Linker created -
-ResetISR                     0x1ce5     0xe  Code  Gb  startup_ewarm.o [1]
-SwitchPedest_Input           0x1821    0x16  Code  Gb  traffic.o [1]
-SwitchStart_Input            0x1837    0x18  Code  Gb  traffic.o [1]
-Touch_Init                    0x87f    0x30  Code  Gb  SSD2119.o [1]
-Touch_ReadX                   0x959    0xaa  Code  Gb  SSD2119.o [1]
-Touch_ReadY                   0xa03    0x9e  Code  Gb  SSD2119.o [1]
-Touch_ReadZ1                  0xaa5    0x3c  Code  Gb  SSD2119.o [1]
-Touch_XVal              0x2000'776c     0x2  Data  Gb  SSD2119.o [1]
-Touch_YVal              0x2000'776e     0x2  Data  Gb  SSD2119.o [1]
-__aeabi_f2d                   0xbd9          Code  Gb  FltToDbl.o [4]
-__aeabi_memset4              0x169d          Code  Gb  ABImemset48.o [5]
-__aeabi_memset8              0x169d          Code  Gb  ABImemset48.o [5]
-__cmain                      0x1c9d          Code  Gb  cmain.o [5]
-__exit                       0x1cd1    0x14  Code  Gb  exit.o [6]
-__iar_Memset4_word           0x16a5          Code  Gb  ABImemset48.o [5]
-__iar_Memset8_word           0x16a5          Code  Gb  ABImemset48.o [5]
-__iar_data_init3             0x1c31    0x28  Code  Gb  data_init.o [5]
-__iar_init_vfp               0x1c59          Code  Gb  fpinit_M.o [4]
+LED_Init                     0x185f    0x48  Code  Gb  traffic.o [1]
+NmiSR                        0x1c85     0x2  Code  Lc  startup_ewarm.o [1]
+Region$$Table$$Base          0x1c08           --   Gb  - Linker created -
+Region$$Table$$Limit         0x1c28           --   Gb  - Linker created -
+ResetISR                     0x1c71     0xe  Code  Gb  startup_ewarm.o [1]
+SwitchPedest_Input           0x1769    0x18  Code  Gb  traffic.o [1]
+SwitchStart_Input            0x1781    0x1c  Code  Gb  traffic.o [1]
+Touch_Init                    0x887    0x30  Code  Gb  SSD2119.o [1]
+Touch_ReadX                   0x961    0xaa  Code  Gb  SSD2119.o [1]
+Touch_ReadY                   0xa0b    0x9e  Code  Gb  SSD2119.o [1]
+Touch_ReadZ1                  0xaad    0x3c  Code  Gb  SSD2119.o [1]
+Touch_XVal              0x2000'7772     0x2  Data  Gb  SSD2119.o [1]
+Touch_YVal              0x2000'7774     0x2  Data  Gb  SSD2119.o [1]
+__aeabi_f2d                   0xbe1          Code  Gb  FltToDbl.o [4]
+__aeabi_memset4              0x15e5          Code  Gb  ABImemset48.o [5]
+__aeabi_memset8              0x15e5          Code  Gb  ABImemset48.o [5]
+__cmain                      0x1c29          Code  Gb  cmain.o [5]
+__exit                       0x1c5d    0x14  Code  Gb  exit.o [6]
+__iar_Memset4_word           0x15ed          Code  Gb  ABImemset48.o [5]
+__iar_Memset8_word           0x15ed          Code  Gb  ABImemset48.o [5]
+__iar_data_init3             0x1bbd    0x28  Code  Gb  data_init.o [5]
+__iar_init_vfp               0x1be5          Code  Gb  fpinit_M.o [4]
 __iar_lz77_init_single3
-                             0x16d7    0x7a  Code  Gb  lz77_init_single.o [5]
-__iar_program_start          0x1cff          Code  Gb  cstartup_M.o [5]
-__iar_zero_init3             0x1bf5    0x3a  Code  Gb  zero_init3.o [5]
-__low_level_init             0x1cbb     0x4  Code  Gb  low_level_init.o [2]
+                             0x161f    0x7a  Code  Gb  lz77_init_single.o [5]
+__iar_program_start          0x1c8b          Code  Gb  cstartup_M.o [5]
+__iar_zero_init3             0x1b55    0x3a  Code  Gb  zero_init3.o [5]
+__low_level_init             0x1c47     0x4  Code  Gb  low_level_init.o [2]
 __vector_table                  0x0   0x26c  Data  Gb  startup_ewarm.o [1]
-_call_main                   0x1ca9          Code  Gb  cmain.o [5]
-_exit                        0x1cc5          Code  Gb  cexit.o [5]
-_main                        0x1cb7          Code  Gb  cmain.o [5]
-control                      0x14d1    0x34  Code  Gb  freertos_demo.o [1]
+_call_main                   0x1c35          Code  Gb  cmain.o [5]
+_exit                        0x1c51          Code  Gb  cexit.o [5]
+_main                        0x1c43          Code  Gb  cmain.o [5]
+abs                           0x4bf     0x8  Code  Gb  SSD2119.o [1]
+control                      0x1471    0x44  Code  Gb  freertos_demo.o [1]
 convertColor                  0x4af    0x10  Code  Gb  SSD2119.o [1]
-cursorX                 0x2000'7760     0x2  Data  Gb  SSD2119.o [1]
-cursorY                 0x2000'7762     0x2  Data  Gb  SSD2119.o [1]
+curr_tick_FSM           0x2000'7728     0x4  Data  Gb  freertos_demo.o [1]
+curr_tick_on_off        0x2000'7730     0x4  Data  Gb  freertos_demo.o [1]
+curr_tick_ped           0x2000'7738     0x4  Data  Gb  freertos_demo.o [1]
+cursorX                 0x2000'776c     0x2  Data  Gb  SSD2119.o [1]
+cursorY                 0x2000'776e     0x2  Data  Gb  SSD2119.o [1]
 eTaskConfirmSleepModeStatus
-                             0x1097    0x24  Code  Gb  tasks.o [1]
-exit                         0x1cbf     0x4  Code  Gb  exit.o [2]
-main                         0x13e1    0x78  Code  Gb  freertos_demo.o [1]
-next_state              0x2000'772c     0x4  Data  Gb  freertos_demo.o [1]
-offset_X                0x2000'7744     0x4  Data  Gb  traffic.o [1]
-offset_Y                0x2000'7748     0x4  Data  Gb  traffic.o [1]
-passenger                    0x1499    0x30  Code  Gb  freertos_demo.o [1]
-passenger_count         0x2000'7734     0x4  Data  Gb  freertos_demo.o [1]
-passenger_status        0x2000'7740     0x4  Data  Gb  freertos_demo.o [1]
-printf                        0x575    0x8c  Code  Gb  SSD2119.o [1]
+                             0x104b    0x24  Code  Gb  tasks.o [1]
+exit                         0x1c4b     0x4  Code  Gb  exit.o [2]
+main                         0x1395    0x64  Code  Gb  freertos_demo.o [1]
+next_state              0x2000'7744     0x4  Data  Gb  traffic.o [1]
+offset_X                0x2000'7750     0x4  Data  Gb  traffic.o [1]
+offset_Y                0x2000'7754     0x4  Data  Gb  traffic.o [1]
+passenger                    0x143d    0x34  Code  Gb  freertos_demo.o [1]
+passenger_status        0x2000'774c     0x4  Data  Gb  traffic.o [1]
+prev_tick_FSM           0x2000'772c     0x4  Data  Gb  freertos_demo.o [1]
+prev_tick_on_off        0x2000'7734     0x4  Data  Gb  freertos_demo.o [1]
+prev_tick_ped           0x2000'773c     0x4  Data  Gb  freertos_demo.o [1]
+printf                        0x57d    0x8c  Code  Gb  SSD2119.o [1]
 prvAddCurrentTaskToDelayedList
-                             0x110b    0x32  Code  Lc  tasks.o [1]
-prvAllocateTCBAndStack       0x113d    0x38  Code  Lc  tasks.o [1]
-prvGetExpectedIdleTime        0xddd    0x20  Code  Lc  tasks.o [1]
-prvIdleTask                  0x102d    0x6a  Code  Lc  tasks.o [1]
+                             0x10bf    0x32  Code  Lc  tasks.o [1]
+prvAllocateTCBAndStack       0x10f1    0x38  Code  Lc  tasks.o [1]
+prvGetExpectedIdleTime        0xddb    0x20  Code  Lc  tasks.o [1]
+prvIdleTask                   0xfe1    0x6a  Code  Lc  tasks.o [1]
 prvInitialiseTCBVariables
-                             0x10bb    0x50  Code  Lc  tasks.o [1]
+                             0x106f    0x50  Code  Lc  tasks.o [1]
 prvResetNextTaskUnblockTime
-                             0x1175    0x1a  Code  Lc  tasks.o [1]
-prvTaskExitError             0x11d9    0x10  Code  Lc  port.o [1]
-pui32Stack              0x2000'7770   0x200  Data  Lc  startup_ewarm.o [1]
-pvPortMalloc                 0x15b9    0xaa  Code  Gb  heap_2.o [1]
+                             0x1129    0x1a  Code  Lc  tasks.o [1]
+prvTaskExitError             0x118d    0x10  Code  Lc  port.o [1]
+pui32Stack              0x2000'7778   0x200  Data  Lc  startup_ewarm.o [1]
+pvPortMalloc                 0x1501    0xaa  Code  Gb  heap_2.o [1]
 pvPortMalloc::xHeapHasBeenInitialised
                         0x2000'0014     0x4  Data  Lc  heap_2.o [1]
 pxCurrentTCB            0x2000'76b4     0x4  Data  Gb  tasks.o [1]
 pxDelayedTaskList       0x2000'76b8     0x4  Data  Lc  tasks.o [1]
 pxOverflowDelayedTaskList
                         0x2000'76bc     0x4  Data  Lc  tasks.o [1]
-pxPortInitialiseStack        0x11b5    0x22  Code  Gb  port.o [1]
+pxPortInitialiseStack        0x1169    0x22  Code  Gb  port.o [1]
 pxReadyTasksLists       0x2000'754c   0x140  Data  Lc  tasks.o [1]
-readEvent                    0x1505    0x3a  Code  Gb  freertos_demo.o [1]
-startStop                    0x1469    0x30  Code  Gb  freertos_demo.o [1]
-start_stop_count        0x2000'7730     0x4  Data  Gb  freertos_demo.o [1]
-start_stop_status       0x2000'773c     0x4  Data  Gb  freertos_demo.o [1]
-state                   0x2000'7728     0x4  Data  Gb  freertos_demo.o [1]
-textColor               0x2000'7764     0x2  Data  Gb  SSD2119.o [1]
+readEvent                    0x18a7    0x3a  Code  Gb  traffic.o [1]
+startStop                    0x1409    0x34  Code  Gb  freertos_demo.o [1]
+start_stop_status       0x2000'7748     0x4  Data  Gb  traffic.o [1]
+state                   0x2000'7740     0x4  Data  Gb  traffic.o [1]
+textColor               0x2000'7770     0x2  Data  Gb  SSD2119.o [1]
 ucHeap                  0x2000'0018  0x7530  Data  Lc  heap_2.o [1]
 ulStoppedTimerCompensation
-                        0x2000'775c     0x4  Data  Lc  port.o [1]
+                        0x2000'7768     0x4  Data  Lc  port.o [1]
 ulTimerCountsForOneTick
-                        0x2000'7754     0x4  Data  Lc  port.o [1]
+                        0x2000'7760     0x4  Data  Lc  port.o [1]
+updateTickCount              0x14b5    0x18  Code  Gb  freertos_demo.o [1]
 uxCriticalNesting       0x2000'7548     0x4  Data  Lc  port.o [1]
 uxCurrentNumberOfTasks  0x2000'76d8     0x4  Data  Lc  tasks.o [1]
-uxListRemove                 0x13b9    0x24  Code  Gb  list.o [1]
+uxListRemove                 0x136d    0x24  Code  Gb  list.o [1]
 uxPendedTicks           0x2000'76e8     0x4  Data  Lc  tasks.o [1]
 uxSchedulerSuspended    0x2000'76fc     0x4  Data  Lc  tasks.o [1]
 uxTaskNumber            0x2000'76f4     0x4  Data  Lc  tasks.o [1]
 uxTasksDeleted          0x2000'76c0     0x4  Data  Lc  tasks.o [1]
 uxTopReadyPriority      0x2000'76e0     0x4  Data  Lc  tasks.o [1]
 vApplicationStackOverflowHook
-                             0x13dd     0x2  Code  Gb  freertos_demo.o [1]
-vListInitialise              0x134d    0x1a  Code  Gb  list.o [1]
-vListInitialiseItem          0x1367     0x6  Code  Gb  list.o [1]
-vListInsert                  0x1387    0x32  Code  Gb  list.o [1]
-vListInsertEnd               0x136d    0x1a  Code  Gb  list.o [1]
-vPortEnableVFP               0x1805          Code  Gb  portasm.o [1]
-vPortEnterCritical           0x121d    0x18  Code  Gb  port.o [1]
-vPortExitCritical            0x1235    0x10  Code  Gb  port.o [1]
-vPortFree                    0x1663    0x36  Code  Gb  heap_2.o [1]
-vPortSVCHandler              0x17d1          Code  Gb  portasm.o [1]
-vPortStartFirstTask          0x17ed          Code  Gb  portasm.o [1]
+                             0x1391     0x2  Code  Gb  freertos_demo.o [1]
+vListInitialise              0x1301    0x1a  Code  Gb  list.o [1]
+vListInitialiseItem          0x131b     0x6  Code  Gb  list.o [1]
+vListInsert                  0x133b    0x32  Code  Gb  list.o [1]
+vListInsertEnd               0x1321    0x1a  Code  Gb  list.o [1]
+vPortEnableVFP               0x174d          Code  Gb  portasm.o [1]
+vPortEnterCritical           0x11d1    0x18  Code  Gb  port.o [1]
+vPortExitCritical            0x11e9    0x10  Code  Gb  port.o [1]
+vPortFree                    0x15ab    0x36  Code  Gb  heap_2.o [1]
+vPortSVCHandler              0x1719          Code  Gb  portasm.o [1]
+vPortStartFirstTask          0x1735          Code  Gb  portasm.o [1]
 vPortSuppressTicksAndSleep
-                             0x127d    0xd0  Code  Wk  port.o [1]
-vTaskDelay                    0xd27    0x34  Code  Gb  tasks.o [1]
-vTaskStartScheduler           0xd79    0x44  Code  Gb  tasks.o [1]
-vTaskStepTick                 0xe95     0xc  Code  Gb  tasks.o [1]
-vTaskSuspendAll               0xdd1     0xc  Code  Gb  tasks.o [1]
-vTaskSwitchContext            0xf51    0x72  Code  Gb  tasks.o [1]
+                             0x1231    0xd0  Code  Wk  port.o [1]
+vTaskDelay                    0xd2f    0x34  Code  Gb  tasks.o [1]
+vTaskStartScheduler           0xd77    0x44  Code  Gb  tasks.o [1]
+vTaskStepTick                 0xe9d     0xc  Code  Gb  tasks.o [1]
+vTaskSuspendAll               0xdcf     0xc  Code  Gb  tasks.o [1]
+vTaskSwitchContext            0xf59    0x72  Code  Gb  tasks.o [1]
 xDelayedTaskList1       0x2000'7700    0x14  Data  Lc  tasks.o [1]
 xDelayedTaskList2       0x2000'7714    0x14  Data  Lc  tasks.o [1]
 xEnd                    0x2000'0008     0x8  Data  Lc  heap_2.o [1]
 xFreeBytesRemaining     0x2000'0010     0x4  Data  Lc  heap_2.o [1]
 xMaximumPossibleSuppressedTicks
-                        0x2000'7758     0x4  Data  Lc  port.o [1]
+                        0x2000'7764     0x4  Data  Lc  port.o [1]
 xNextTaskUnblockTime    0x2000'76f8     0x4  Data  Lc  tasks.o [1]
 xNumOfOverflows         0x2000'76f0     0x4  Data  Lc  tasks.o [1]
 xPendingReadyList       0x2000'768c    0x14  Data  Lc  tasks.o [1]
-xPortPendSVHandler           0x1779          Code  Gb  portasm.o [1]
-xPortStartScheduler          0x11e9    0x34  Code  Gb  port.o [1]
-xPortSysTickHandler          0x1245    0x26  Code  Gb  port.o [1]
-xPos                    0x2000'774c     0x4  Data  Gb  traffic.o [1]
-xQueueGenericCreate          0x19bf    0x44  Code  Gb  queue.o [1]
-xQueueGenericReset           0x1951    0x6e  Code  Gb  queue.o [1]
+xPortPendSVHandler           0x16c1          Code  Gb  portasm.o [1]
+xPortStartScheduler          0x119d    0x34  Code  Gb  port.o [1]
+xPortSysTickHandler          0x11f9    0x26  Code  Gb  port.o [1]
+xPos                    0x2000'7758     0x4  Data  Gb  traffic.o [1]
 xSchedulerRunning       0x2000'76e4     0x4  Data  Lc  tasks.o [1]
 xStart                  0x2000'0000     0x8  Data  Lc  heap_2.o [1]
 xSuspendedTaskList      0x2000'76c4    0x14  Data  Lc  tasks.o [1]
-xTaskGenericCreate            0xc21   0x106  Code  Gb  tasks.o [1]
-xTaskIncrementTick            0xea1    0xb0  Code  Gb  tasks.o [1]
-xTaskRemoveFromEventList
-                              0xfd3    0x54  Code  Gb  tasks.o [1]
-xTaskResumeAll                0xdfd    0x98  Code  Gb  tasks.o [1]
+xTaskGenericCreate            0xc29   0x106  Code  Gb  tasks.o [1]
+xTaskGetTickCount             0xe93     0x2  Code  Gb  tasks.o [1]
+xTaskIncrementTick            0xea9    0xb0  Code  Gb  tasks.o [1]
+xTaskResumeAll                0xdfb    0x98  Code  Gb  tasks.o [1]
 xTasksWaitingTermination
                         0x2000'76a0    0x14  Data  Lc  tasks.o [1]
 xTickCount              0x2000'76dc     0x4  Data  Lc  tasks.o [1]
 xYieldPending           0x2000'76ec     0x4  Data  Lc  tasks.o [1]
-yPos                    0x2000'7750     0x4  Data  Gb  traffic.o [1]
+yPos                    0x2000'775c     0x4  Data  Gb  traffic.o [1]
 
 
 [1] = C:\RTOS\TivaWare_C_Series-2.1.4.178\examples\boards\ek-tm4c123gxl\freertos_demo\ewarm\Obj
@@ -394,9 +395,9 @@ yPos                    0x2000'7750     0x4  Data  Gb  traffic.o [1]
 [5] = rt7M_tl.a
 [6] = shb_l.a
 
-   6 300 bytes of readonly  code memory
-   1 477 bytes of readonly  data memory
-  31 088 bytes of readwrite data memory
+   6 138 bytes of readonly  code memory
+   1 523 bytes of readonly  data memory
+  31 094 bytes of readwrite data memory
 
 Errors: none
 Warnings: none

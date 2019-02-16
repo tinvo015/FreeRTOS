@@ -38,30 +38,29 @@
 #include "task.h"
 #include "queue.h"
 #include "semphr.h"
-#include "clockColtrol.h"
+// #include "clockColtrol.h"
 #include "traffic.h"
 #include "lab2a.h"
 #include "myHeader.h"
+#include <stdlib.h>
 
-// FSM state definition
-const int OFF = 0;
-const int GO = 1;
-const int STOP = 2;
-const int WARN = 3;
 
-volatile int state = 0;
-volatile int next_state = 0;
 
 void passenger(void *p);
 void startStop(void *p);
 void control(void *p);
 void FSM(void);
+void updateTickCount(void);
 
-volatile int start_stop_count = 0;
-volatile int passenger_count = 0;
-volatile int FSM_count = 0;
-volatile int start_stop_status = 0;
-volatile int passenger_status = 0;
+extern volatile int start_stop_status;
+extern volatile int passenger_status;
+
+volatile int curr_tick_FSM = 0;
+volatile int prev_tick_FSM = 0;
+volatile int curr_tick_on_off = 0;
+volatile int prev_tick_on_off = 0;
+volatile int curr_tick_ped = 0;
+volatile int prev_tick_ped = 0;
 
 xQueueHandle Global_Queue_Handle = NULL;
 
@@ -241,18 +240,17 @@ main(void)
 		LED_Init();
 		LCD_Init();
 		Touch_Init();
-		LED_Init();
-		// LCD_Calibration();
-		// LCD_Init();
+		LCD_Calibration();
+		LCD_Init();
 		DrawButton();
 		
 		
 		// xTaskCreate(Lab5A, (signed char*) "Lab5A", 1024, NULL, 1, NULL);
 		
-		Global_Queue_Handle = xQueueCreate(3, sizeof(int));
-		xTaskCreate(startStop, (signed char*) "startStop", 1024, NULL, 2, NULL);
-		xTaskCreate(passenger, (signed char*) "passenger", 1024, NULL, 1, NULL);
-		xTaskCreate(control, (signed char*) "control", 1024, NULL, 3, NULL);
+		// Global_Queue_Handle = xQueueCreate(3, sizeof(int));
+		xTaskCreate(startStop, (char const*) "startStop", 1024, NULL, 5, NULL);
+		xTaskCreate(passenger, (char const*) "passenger", 1024, NULL, 4, NULL);
+		xTaskCreate(control, (char const*) "control", 1024, NULL, 3, NULL);
 		
     vTaskStartScheduler();
 
@@ -269,96 +267,60 @@ main(void)
 void startStop(void *p) {
 	while (1) {
 		LCD_DisplayTouchPos();
-		if (SwitchStart_Input()) {
-			start_stop_count++;
-			if (start_stop_count == 2) {
-				start_stop_count = 0;
-				start_stop_status = 1;
-			}
-		} else {
-			start_stop_count = 0;
-			start_stop_status = 0;
-		}
-		vTaskDelay(1000);
+    if (SwitchStart_Input()) {
+      updateTickCount();
+      if (abs(curr_tick_on_off - prev_tick_on_off) >= 2000) {
+        start_stop_status = 1;
+        prev_tick_on_off = curr_tick_on_off;
+      }
+    }
+    else {
+      start_stop_status = 0;
+      prev_tick_on_off = curr_tick_on_off;
+      // vTaskDelay(50);
+    }
+    vTaskDelay(50);
 	}
 }
 
 void passenger(void *p) {
 	while (1) {
 		LCD_DisplayTouchPos();
-		if (SwitchPedest_Input()) {
-			passenger_count++;
-			if (passenger_count == 2) {
-				passenger_count = 0;
-				passenger_status = 1;
-			}
-		} else {
-			passenger_count = 0;
-			passenger_status = 0;
-		}
-		vTaskDelay(1000);
+    if (SwitchPedest_Input()) {
+      updateTickCount();
+      if (abs(curr_tick_ped - prev_tick_ped) >= 2000) {
+        passenger_status = 1;
+        prev_tick_ped = curr_tick_ped;
+      }
+    }
+    else {
+      passenger_status = 0;
+      prev_tick_ped = curr_tick_ped;
+      // vTaskDelay(50);
+    }
+    vTaskDelay(50);
 	}
 }
 
 void control(void *p) {
 	while (1) {
+    // if (isPressed()) {
+    //   vTaskDelay(5);
+    // }
 		LCD_DisplayTouchPos();
-		FSM_count++;
-		if (FSM_count == 5 || start_stop_status || passenger_status) {
-			FSM();
+    updateTickCount();
+    if (abs(curr_tick_FSM - prev_tick_FSM) >= 5000 || start_stop_status || passenger_status) {
+      FSM();
+			prev_tick_FSM = curr_tick_FSM;
 		}
-		if (FSM_count == 5) {
-			FSM_count = 0;
-		}
-		vTaskDelay(1000);
-	}
-}
-
-// executes the output of the parameter state
-void readEvent(int state) {
-  GPIODATA_PORTE &= ~0xFF;
-	if (state == OFF) {
-    GPIODATA_PORTE &= ~0xFF;
-	} else if (state == GO) {
-    GPIODATA_PORTE |= PIN2;
-  } else if (state == STOP) {
-    GPIODATA_PORTE |= PIN0;
-  } else if (state == WARN) {
-    GPIODATA_PORTE |= PIN1;
+    start_stop_status = 0;
+    passenger_status = 0;
+    vTaskDelay(50);
   }
 }
 
-void FSM(void) 
-{
-  if (state == GO)
-  {
-    if (start_stop_status)
-      next_state = OFF;
-    else if (passenger_status)
-      next_state = WARN;
-    else
-      next_state = STOP;
-  }
-  else if (state == STOP)
-  {
-    if (start_stop_status)
-      next_state = OFF;
-    else
-      next_state = GO;
-  }
-  else if (state == WARN)
-  {
-    if (start_stop_status)
-      next_state = OFF;
-    else
-      next_state = STOP;
-  }
-  else
-  {
-    if (start_stop_status)
-      next_state = STOP;
-  }
-  
-  state = next_state;         // assign the current state to the next state
-	readEvent(state);
+void updateTickCount(void) {
+  curr_tick_FSM = xTaskGetTickCount();
+  curr_tick_on_off = xTaskGetTickCount();
+  curr_tick_ped = xTaskGetTickCount();
 }
